@@ -21,6 +21,7 @@ class HoKinhDoanh extends Model
         'status',
         'balance',
         'amount_old',
+        'created_by',
     ];
 
 

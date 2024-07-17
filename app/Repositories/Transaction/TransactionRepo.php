@@ -1072,6 +1072,7 @@ class TransactionRepo extends BaseRepo
             ->whereBetween('time_payment', [$startDate, $endDate])
             ->where('status', Constants::USER_STATUS_ACTIVE)
             ->whereIn('method', $method)
+            ->where('created_by', auth()->user()->id)
             ->groupBy('date')
             ->get();
     }

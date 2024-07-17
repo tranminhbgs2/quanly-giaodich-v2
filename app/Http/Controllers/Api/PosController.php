@@ -11,6 +11,7 @@ use App\Http\Requests\Pos\GetDetailRequest;
 use App\Http\Requests\Pos\ListingRequest;
 use App\Http\Requests\Pos\StoreRequest;
 use App\Http\Requests\Pos\UpdateRequest;
+use App\Repositories\HoKinhDoanh\HoKinhDoanhRepo;
 use App\Repositories\Pos\PosRepo;
 
 class PosController extends Controller
@@ -18,9 +19,10 @@ class PosController extends Controller
     protected $pos_repo;
     protected $hkd_repo;
 
-    public function __construct(PosRepo $posRepo)
+    public function __construct(PosRepo $posRepo, HoKinhDoanhRepo $hkdRepo)
     {
         $this->pos_repo = $posRepo;
+        $this->hkd_repo = $hkdRepo;
     }
 
     /**
@@ -110,6 +112,11 @@ class PosController extends Controller
         $params['code'] = strtoupper(request('name', null));
         $params['code'] = unsigned($params['code']);
         $params['code'] = str_replace(' ', '_', $params['code']);
+
+        $hkd = $this->hkd_repo->getByUserId($params['created_by']);
+        if ($hkd) {
+            $params['hkd_id'] = $hkd->id;
+        }
         $resutl = $this->pos_repo->store($params);
 
         if ($resutl) {
@@ -160,6 +167,10 @@ class PosController extends Controller
             $params['code'] = unsigned($params['code']);
             $params['code'] = str_replace(' ', '_', $params['code']);
 
+            $hkd = $this->hkd_repo->getByUserId($params['created_by']);
+            if ($hkd) {
+                $params['hkd_id'] = $hkd->id;
+            }
             $resutl = $this->pos_repo->update($params, $params['id']);
 
             if ($resutl) {

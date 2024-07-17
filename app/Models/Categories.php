@@ -17,5 +17,6 @@ class Categories extends Model
         'name',
         'note',
         'status',
+        'created_by',
     ];
 }

@@ -12,7 +12,9 @@ use App\Http\Requests\Customer\StoreRequest;
 use App\Http\Requests\Customer\UpdateRequest;
 use App\Http\Requests\User\ChangeStatusRequest;
 use App\Repositories\BankAccount\BankAccountRepo;
+use App\Repositories\Category\CategoryRepo;
 use App\Repositories\Customer\CustomerRepo;
+use App\Repositories\HoKinhDoanh\HoKinhDoanhRepo;
 use App\Repositories\Transaction\TransactionRepo;
 use App\Repositories\Transfer\TransferRepo;
 use App\Repositories\User\UserRepo;
@@ -155,6 +157,15 @@ class UserController extends Controller
         $resutl = $this->cus_repo->store($params);
 
         if ($resutl) {
+            // Thêm categories
+            $cate_repo = new CategoryRepo();
+            $cate_repo->store(['name'  => 'Khách lẻ (2.0)', 'fee' => 2, 'status' => Constants::USER_STATUS_ACTIVE, 'created_by' => $resutl]);
+            $cate_repo->store(['name'  => 'CTV (1.8)', 'fee' => 1.8, 'status' => Constants::USER_STATUS_ACTIVE, 'created_by' => $resutl]);
+
+            //Thêm hộ kinh doanh
+            $hkd_repo = new HoKinhDoanhRepo();
+            $hkd_id = $hkd_repo->store(['name' => 'HKD - ' . $params['fullname'], 'phone' => $params['phone'], 'address' => $params['address'], 'status' => Constants::USER_STATUS_ACTIVE, 'created_by' => $resutl]);
+
             $this->cus_repo->attachPositions($resutl, request('action_ids', []) ?? []);
             return response()->json([
                 'code' => 200,

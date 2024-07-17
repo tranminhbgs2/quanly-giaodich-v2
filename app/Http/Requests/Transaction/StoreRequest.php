@@ -87,10 +87,7 @@ class StoreRequest extends FormRequest
     {
         $validator->after(function ($validator) {
 
-            //Kế toán này chỉ xem dc GD Online
-            if (auth()->user()->id == 2370 && !in_array($this->request->get('method'), ['ONLINE', 'QR_CODE'])) {
-                $validator->errors()->add('check_exist', 'Bạn chỉ được thực hiện giao dịch online hoặc qua mã QR');
-            }
+
             $dep = Pos::where('id', $this->request->get('pos_id'))->first();
 
             if ($dep) {
@@ -103,6 +100,14 @@ class StoreRequest extends FormRequest
                         }
                     }
                 }
+                if($dep->status == Constants::USER_STATUS_LOCKED){
+                    $validator->errors()->add('check_exist', 'Máy POS không hoạt động');
+                }
+                if($dep->created_by != auth()->user()->id){
+                    $validator->errors()->add('check_exist', 'Máy POS không thuộc quyền sử dụng của bạn');
+                }
+            } else {
+                $validator->errors()->add('check_exist', 'Máy POS không tồn tại');
             }
 
             //     $dep_code = Department::where('code', $this->request->get('code'))->withTrashed()->first();
@@ -111,16 +116,7 @@ class StoreRequest extends FormRequest
             //     }
             // });
             if (auth()->user()->account_type == Constants::ACCOUNT_TYPE_STAFF || auth()->user()->account_type == Constants::ACCOUNT_TYPE_ACCOUNTANT) {
-                if ($this->request->get('method') == "DAO_HAN") {
-                    $dep = BankAccounts::where('type', Constants::ACCOUNT_TYPE_STAFF)->where('staff_id', auth()->user()->id)->first();
-                    if ($dep) {
-                        if ($dep->balance < $this->request->get('price_nop') || $dep->balance < $this->request->get('price_transfer')) {
-                            $validator->errors()->add('check_exist', 'Số dư không đủ');
-                        }
-                    } else {
-                        $validator->errors()->add('check_exist', 'Nhân viên chưa thêm tài khoản ngân hàng');
-                    }
-                }
+
             } else if (auth()->user()->account_type == "SYSTEM") {
                 $validator
                     ->errors()->add('check_exist', 'Chỉ nhân viên thực hiện giao dịch');

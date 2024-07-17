@@ -121,7 +121,8 @@ class HoKinhDoanhRepo extends BaseRepo
             'address',
             'status',
             'balance',
-            'amount_old'
+            'amount_old',
+            'created_by'
         ];
 
         $insert = [];
@@ -132,7 +133,8 @@ class HoKinhDoanhRepo extends BaseRepo
             }
         }
         if (!empty($insert['name'])) {
-            return HoKinhDoanh::create($insert) ? true : false;
+            $res = HoKinhDoanh::create($insert);
+            return $res->id;
         }
 
         return false;
@@ -147,7 +149,8 @@ class HoKinhDoanhRepo extends BaseRepo
             'address',
             'status',
             'balance',
-            'amount_old'
+            'amount_old',
+            'created_by',
         ];
 
         $update = [];
@@ -222,6 +225,22 @@ class HoKinhDoanhRepo extends BaseRepo
                 'data' => null
             ];
         }
+    }
+
+    /**
+     * Hàm lấy chi tiết thông tin GD
+     *
+     * @param $params
+     */
+    public function getByUserId($id, $with_trashed = false)
+    {
+        $tran = HoKinhDoanh::where('created_by', $id);
+
+        if ($with_trashed) {
+            $tran->withTrashed();
+        }
+
+        return $tran->first();
     }
 
     /**

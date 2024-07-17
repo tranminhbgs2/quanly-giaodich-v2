@@ -411,6 +411,33 @@ class MoneyComesBackController extends Controller
         ]);
     }
 
+
+    public function WithdrawLo(KetToanLoRequest $request)
+    {
+        $params['id'] = request('id', null);
+        $params['time_withdraw'] = request('time_withdraw', null); // id đại lý
+        if (!empty($params['time_withdraw'])) {
+            $params['time_withdraw'] = str_replace('/', '-', $params['time_withdraw']);
+        } else {
+            $params['time_withdraw'] = null;
+        }
+        $resutl = $this->money_repo->WithdrawLo($params['id'], $params['time_withdraw']);
+
+        if ($resutl) {
+            return response()->json([
+                'code' => 200,
+                'error' => 'Rút tiền lô thành công',
+                'data' => null
+            ]);
+        }
+
+        return response()->json([
+            'code' => 400,
+            'error' => 'Rút tiền lô không thành công',
+            'data' => null
+        ]);
+    }
+
     public function getTopAgency()
     {
         $params['date_from'] = request('date_from', null);
@@ -734,7 +761,6 @@ class MoneyComesBackController extends Controller
             'data' => null
         ]);
     }
-
     // Controller method
     public function getProfit()
     {
@@ -751,6 +777,7 @@ class MoneyComesBackController extends Controller
 
         // Khởi tạo mảng kết quả với các ngày từ $startDate đến $endDate
         $output = [];
+        $totalProfit = 0; // Biến để lưu tổng lợi nhuận
         for ($date = $startDate; $date->lte($endDate); $date->addDay()) {
             $output[$date->format('d/m/Y')] = [
                 'date' => $date->format('d/m/Y'),
@@ -772,6 +799,7 @@ class MoneyComesBackController extends Controller
             if (isset($output[$date])) {
                 $output[$date]['profit_trans'] = (int)$transaction->profit_trans;
                 $output[$date]['total_profit'] += (int)$transaction->profit_trans;
+                $totalProfit += (int)$transaction->profit_trans;
             }
         }
 
@@ -780,6 +808,7 @@ class MoneyComesBackController extends Controller
             if (isset($output[$date])) {
                 $output[$date]['profit_online'] = (int)$tranOnline->profit_trans;
                 $output[$date]['total_profit'] += (int)$tranOnline->profit_trans;
+                $totalProfit += (int)$tranOnline->profit_trans;
             }
         }
 
@@ -788,6 +817,7 @@ class MoneyComesBackController extends Controller
             if (isset($output[$date])) {
                 $output[$date]['profit_qr'] = (int)$tranQR->profit_trans;
                 $output[$date]['total_profit'] += (int)$tranQR->profit_trans;
+                $totalProfit += (int)$tranQR->profit_trans;
             }
         }
 
@@ -796,13 +826,15 @@ class MoneyComesBackController extends Controller
             if (isset($output[$date])) {
                 $output[$date]['profit_money'] = (int)$money->profit_money;
                 $output[$date]['total_profit'] += (int)$money->profit_money;
+                $totalProfit += (int)$money->profit_money;
             }
         }
 
         return response()->json([
             'code' => 200,
             'error' => 'Danh sách lợi nhuận',
-            'data' => $output,
+            'data' => array_values($output),
+            'total' => $totalProfit, // Tổng lợi nhuận
         ]);
     }
 }

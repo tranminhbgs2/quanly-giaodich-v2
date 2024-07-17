@@ -114,10 +114,7 @@ class UpdateRequest extends FormRequest
     {
         $validator->after(function ($validator) {
 
-            //Kế toán này chỉ xem dc GD Online
-            if (auth()->user()->id == 2370 && !in_array($this->request->get('method'), ['ONLINE', 'QR_CODE'])) {
-                $validator->errors()->add('check_exist', 'Bạn chỉ được thực hiện giao dịch online hoặc qua mã QR');
-            }
+
             // Check tồn tại
             $dep = Pos::where('id', $this->request->get('pos_id'))->first();
 
@@ -131,24 +128,17 @@ class UpdateRequest extends FormRequest
                         }
                     }
                 }
+                if($dep->status == Constants::USER_STATUS_LOCKED){
+                    $validator->errors()->add('check_exist', 'Máy POS không hoạt động');
+                }
+                if($dep->created_by != auth()->user()->id){
+                    $validator->errors()->add('check_exist', 'Máy POS không thuộc quyền sử dụng của bạn');
+                }
             }
             $trans = Transaction::where('id', $this->request->get('id'))->first();
             if ($trans) {
-                if ($trans->method == "DAO_HAN" && $trans->method != $this->request->get('method')) {
-                    $validator->errors()->add('check_exist', 'Không thể thay đổi hình thức giao dịch đáo hạn');
-                }elseif ($trans->status == Constants::USER_STATUS_DELETED) {
+                if ($trans->status == Constants::USER_STATUS_DELETED) {
                     $validator->errors()->add('check_exist', 'Giao dịch khách lẻ đã bị xóa');
-                }elseif (auth()->user()->account_type == Constants::ACCOUNT_TYPE_STAFF) {
-                    if ($this->request->get('method') == "DAO_HAN") {
-                        $dep = BankAccounts::where('type', Constants::ACCOUNT_TYPE_STAFF)->where('staff_id', auth()->user()->id)->first();
-                        if ($dep) {
-                            if ($dep->balance < ($this->request->get('price_nop') - $dep->price_nop) || $dep->balance < ($this->request->get('price_transfer') - $dep->price_transfer)) {
-                                $validator->errors()->add('check_exist', 'Số dư không đủ');
-                            }
-                        } else {
-                            $validator->errors()->add('check_exist', 'Nhân viên chưa thêm tài khoản ngân hàng');
-                        }
-                    }
                 } elseif (auth()->user()->account_type == "SYSTEM") {
                     $validator->errors()->add('check_exist', 'Chỉ nhân viên thực hiện giao dịch');
                 }

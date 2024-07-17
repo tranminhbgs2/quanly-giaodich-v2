@@ -64,7 +64,8 @@ class CategoryRepo extends BaseRepo
             'fee',
             'name',
             'note',
-            'status'
+            'status',
+            'created_by'
         ];
 
         $insert = [];
@@ -89,7 +90,8 @@ class CategoryRepo extends BaseRepo
             'fee',
             'name',
             'note',
-            'status'
+            'status',
+            'created_by'
         ];
 
         $update = [];

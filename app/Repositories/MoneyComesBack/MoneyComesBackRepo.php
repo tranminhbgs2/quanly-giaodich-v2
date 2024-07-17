@@ -534,7 +534,6 @@ class MoneyComesBackRepo extends BaseRepo
                 }
 
                 $hkd = $hkd_repo->getById($params['hkd_id']);
-                $pos = Pos::where('id', $params['pos_id'])->first();
                 if ($hkd) {
                     $hkd_balance = $hkd->balance + ($params['total_price'] - ($pos->total_fee * $params['total_price']) / 100);
                     $hkd_repo = new HoKinhDoanhRepo();
@@ -635,7 +634,6 @@ class MoneyComesBackRepo extends BaseRepo
 
             $hkd_repo = new HoKinhDoanhRepo();
             $hkd = $hkd_repo->getById($params['hkd_id']);
-            $pos = Pos::where('id', $params['pos_id'])->first();
             if ($hkd) {
                 $hkd_balance = $hkd->balance + $total_price_hkd;
                 $hkd_repo = new HoKinhDoanhRepo();
@@ -1069,6 +1067,73 @@ class MoneyComesBackRepo extends BaseRepo
 
         return MoneyComesBack::where('id', $id)->update($update);
     }
+
+    public function WithdrawLo($id, $time_withdraw)
+    {
+        if (empty($time_withdraw)) {
+            $status = Constants::USER_STATUS_LOCKED;
+        } else {
+            $status = Constants::USER_STATUS_ACTIVE;
+        }
+
+        $update = [
+            'time_withdraw' => $time_withdraw,
+            'status' => $status
+        ];
+        $old_money = MoneyComesBack::where('id', $id)->first();
+        $res = MoneyComesBack::where('id', $id)->update($update);
+        if ($res) {
+
+            // Lưu log qua event
+            event(new ActionLogEvent([
+                'actor_id' => auth()->user()->id ?? 0,
+                'username' => auth()->user()->username ?? 0,
+                'action' => 'UPDATE_TIME_WITHDRAW_MONEY_COMES_BACK',
+                'description' => 'Cập nhật thời gian rút tiền lô tiền về KL ' . $old_money->lo_number . ' từ ' . $old_money->time_withdraw . ' thành ' . $time_withdraw,
+                'data_new' => $time_withdraw,
+                'data_old' => $old_money->time_withdraw,
+                'model' => 'MoneyComesBack',
+                'table' => 'money_comes_back',
+                'record_id' => $id,
+                'ip_address' => request()->ip()
+            ]));
+
+
+            $pos = Pos::where('id', $old_money->pos_id)->first();
+            $hkd_repo = new HoKinhDoanhRepo();
+            $hkd = $hkd_repo->getById($old_money->pos_idhkd_id);
+
+            if ($old_money->time_withdraw == null && $time_withdraw != null) {
+                $price_rut = ($old_money->total_price - ($old_money->fee * $old_money->total_price) / 100); // Tính số tiền cộng cho HKD
+                if ($pos) {
+                    $pos_balance = $pos->price_pos - $price_rut;
+                    $pos_repo = new PosRepo();
+                    $pos_repo->updatePricePos($pos_balance, $pos->id, "UPDATE_KL_MONEY_COMES_BACK_" . $id);
+                }
+
+                if ($hkd) {
+                    $hkd_balance = $hkd->balance - $price_rut;
+                    $hkd_repo = new HoKinhDoanhRepo();
+                    $hkd_repo->updateBalance($hkd_balance, $hkd->id, "UPDATE_KL_MONEY_COMES_BACK_" . $id);
+                }
+            } elseif ($old_money->time_withdraw != null && $time_withdraw == null) {
+                $price_rut = ($old_money->total_price - ($old_money->fee * $old_money->total_price) / 100); // Tính số tiền cộng cho HKD
+                if ($pos) {
+                    $pos_balance = $pos->price_pos + $price_rut;
+                    $pos_repo = new PosRepo();
+                    $pos_repo->updatePricePos($pos_balance, $pos->id, "UPDATE_KL_MONEY_COMES_BACK_" . $id);
+                }
+
+                if ($hkd) {
+                    $hkd_balance = $hkd->balance + $price_rut;
+                    $hkd_repo = new HoKinhDoanhRepo();
+                    $hkd_repo->updateBalance($hkd_balance, $hkd->id, "UPDATE_KL_MONEY_COMES_BACK_" . $id);
+                }
+            }
+        }
+        return $res;
+    }
+
     public function getTopAgency($params)
     {
         $date_from = Carbon::parse($params['date_from'] ?? Carbon::now()->startOfDay())->startOfDay();
