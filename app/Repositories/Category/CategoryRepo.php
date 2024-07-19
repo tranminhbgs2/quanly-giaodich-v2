@@ -206,6 +206,12 @@ class CategoryRepo extends BaseRepo
 
     public function getAll()
     {
-        return Categories::select('id', 'name', 'code', 'fee')->where('status', Constants::USER_STATUS_ACTIVE)->orderBy('id', 'DESC')->get()->toArray();
+        $categories = Categories::select('id', 'name', 'code', 'fee');
+
+
+        if (auth()->user()->account_type == Constants::ACCOUNT_TYPE_STAFF) {
+            $categories->where('created_by', auth()->user()->id);
+        }
+        return $categories->where('status', Constants::USER_STATUS_ACTIVE)->orderBy('id', 'DESC')->get()->toArray();
     }
 }
