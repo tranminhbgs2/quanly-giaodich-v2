@@ -43,6 +43,10 @@ class CategoryRepo extends BaseRepo
             $query->where('status', '!=', Constants::USER_STATUS_DELETED);
         }
 
+        if (auth()->user()->account_type == Constants::ACCOUNT_TYPE_STAFF) {
+            $query->where('created_by', auth()->user()->id);
+        }
+
         if ($is_counting) {
             return $query->count();
         } else {
@@ -146,6 +150,10 @@ class CategoryRepo extends BaseRepo
         $id = isset($params['id']) ? $params['id'] : 0;
         $tran = Categories::select()->where('id', $id);
 
+
+        if (auth()->user()->account_type == Constants::ACCOUNT_TYPE_STAFF) {
+            $tran->where('created_by', auth()->user()->id);
+        }
         if ($with_trashed) {
             $tran->withTrashed();
         }
@@ -177,6 +185,10 @@ class CategoryRepo extends BaseRepo
     {
         $tran = Categories::select()->where('id', $id);
 
+
+        if (auth()->user()->account_type == Constants::ACCOUNT_TYPE_STAFF) {
+            $tran->where('created_by', auth()->user()->id);
+        }
         if ($with_trashed) {
             $tran->withTrashed();
         }

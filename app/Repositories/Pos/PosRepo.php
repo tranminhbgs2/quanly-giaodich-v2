@@ -45,9 +45,9 @@ class PosRepo extends BaseRepo
             });
         }
 
-        // if ($account_type == Constants::ACCOUNT_TYPE_STAFF) {
-        //     $query->where('created_by', $created_by);
-        // }
+        if ($account_type == Constants::ACCOUNT_TYPE_STAFF) {
+            $query->where('created_by', $created_by);
+        }
 
         if ($date_from && $date_to && strtotime($date_from) <= strtotime($date_to) && !empty($date_from) && !empty($date_to)) {
             $query->whereBetween('created_at', [$date_from, $date_to]);
@@ -205,7 +205,12 @@ class PosRepo extends BaseRepo
     public function delete($params)
     {
         $id = isset($params['id']) ? $params['id'] : null;
-        $pos = Pos::where('id', $id)->first();
+        $pos = Pos::where('id', $id);
+
+        if (auth()->user()->account_type == Constants::ACCOUNT_TYPE_STAFF) {
+            $pos->where('created_by', auth()->user()->id);
+        }
+        $pos->first();
 
         if ($pos) {
             if ($pos->status == Constants::USER_STATUS_DELETED) {
@@ -296,6 +301,9 @@ class PosRepo extends BaseRepo
             },
         ]);
 
+        if (auth()->user()->account_type == Constants::ACCOUNT_TYPE_STAFF) {
+            $tran->where('created_by', auth()->user()->id);
+        }
         if ($with_trashed) {
             $tran->withTrashed();
         }

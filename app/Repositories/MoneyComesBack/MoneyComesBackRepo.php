@@ -93,6 +93,10 @@ class MoneyComesBackRepo extends BaseRepo
             $query->where('hkd_id', $hkd_id);
         }
 
+        if (auth()->user()->account_type == Constants::ACCOUNT_TYPE_STAFF) {
+            $query->where('created_by', auth()->user()->id);
+        }
+
         // $query->whereNull('agent_id');
 
         if ($status > 0) {
@@ -183,6 +187,10 @@ class MoneyComesBackRepo extends BaseRepo
             $query->where('status', '!=', Constants::USER_STATUS_DELETED);
         }
 
+        if (auth()->user()->account_type == Constants::ACCOUNT_TYPE_STAFF) {
+            $query->where('created_by', auth()->user()->id);
+        }
+
         if ($is_counting) {
             return $query->count();
         } else {
@@ -251,6 +259,10 @@ class MoneyComesBackRepo extends BaseRepo
             $query->where('status', $status);
         } else {
             $query->where('status', '!=', Constants::USER_STATUS_DELETED);
+        }
+
+        if (auth()->user()->account_type == Constants::ACCOUNT_TYPE_STAFF) {
+            $query->where('created_by', auth()->user()->id);
         }
 
         $query->where('total_price', '>', 0);
@@ -349,6 +361,10 @@ class MoneyComesBackRepo extends BaseRepo
             $query->where('status', $status);
         } else {
             $query->where('status', '!=', Constants::USER_STATUS_DELETED);
+        }
+
+        if (auth()->user()->account_type == Constants::ACCOUNT_TYPE_STAFF) {
+            $query->where('created_by', auth()->user()->id);
         }
 
         $query->where('total_price', '>', 0);
@@ -711,6 +727,10 @@ class MoneyComesBackRepo extends BaseRepo
     {
         $id = isset($params['id']) ? $params['id'] : 0;
         $tran = MoneyComesBack::select()->where('id', $id);
+
+        if (auth()->user()->account_type == Constants::ACCOUNT_TYPE_STAFF) {
+            $tran->where('created_by', auth()->user()->id);
+        }
         $tran->with([
             'pos' => function ($sql) {
                 $sql->select(['id', 'name']);
@@ -756,6 +776,10 @@ class MoneyComesBackRepo extends BaseRepo
         $pos_id = isset($params['pos_id']) ? $params['pos_id'] : 0;
         $time_process = isset($params['time_process']) ? $params['time_process'] : null;
         $tran = MoneyComesBack::where('lo_number', $lo_number);
+
+        if (auth()->user()->account_type == Constants::ACCOUNT_TYPE_STAFF) {
+            $tran->where('created_by', auth()->user()->id);
+        }
         $tran->where('agent_id', 0);
         $tran->where('pos_id', $pos_id);
         if ($time_process) {
@@ -767,6 +791,10 @@ class MoneyComesBackRepo extends BaseRepo
     public function getByTimeProcess($time_process, $with_trashed = false)
     {
         $tran = MoneyComesBack::where('agent_id', 0);
+
+        if (auth()->user()->account_type == Constants::ACCOUNT_TYPE_STAFF) {
+            $tran->where('created_by', auth()->user()->id);
+        }
         try {
             $date_from = Carbon::createFromFormat('Y-m-d H:i:s', $time_process, 'UTC')->startOfDay();
             $date_to = Carbon::createFromFormat('Y-m-d H:i:s', $time_process, 'UTC')->endOfDay();
@@ -784,6 +812,10 @@ class MoneyComesBackRepo extends BaseRepo
     public function getById($id, $with_trashed = false)
     {
         $tran = MoneyComesBack::where('id', $id);
+
+        if (auth()->user()->account_type == Constants::ACCOUNT_TYPE_STAFF) {
+            $tran->where('created_by', auth()->user()->id);
+        }
         $tran->with([
             'pos' => function ($sql) {
                 $sql->select(['id', 'name']);
@@ -870,6 +902,9 @@ class MoneyComesBackRepo extends BaseRepo
             $query->where('hkd_id', $hkd_id);
         }
 
+        if (auth()->user()->account_type == Constants::ACCOUNT_TYPE_STAFF) {
+            $query->where('created_by', auth()->user()->id);
+        }
 
         $query->where('total_price', '>', 0);
         // $query->whereNull('agent_id');
@@ -938,6 +973,10 @@ class MoneyComesBackRepo extends BaseRepo
             $query->where('agent_id', $agent_id);
         } else {
             $query->where('agent_id', '!=', 0);
+        }
+
+        if (auth()->user()->account_type == Constants::ACCOUNT_TYPE_STAFF) {
+            $query->where('created_by', auth()->user()->id);
         }
 
         if ($status > 0) {
@@ -1258,6 +1297,10 @@ class MoneyComesBackRepo extends BaseRepo
             $query->where('status', '!=', Constants::USER_STATUS_DELETED);
         }
 
+        if (auth()->user()->account_type == Constants::ACCOUNT_TYPE_STAFF) {
+            $query->where('created_by', auth()->user()->id);
+        }
+
         $query->orderBy('id', 'DESC');
 
         return $query->get()->toArray();
@@ -1407,6 +1450,10 @@ class MoneyComesBackRepo extends BaseRepo
             $query->where('agent_id', $agent_id);
         }
 
+        if (auth()->user()->account_type == Constants::ACCOUNT_TYPE_STAFF) {
+            $query->where('created_by', auth()->user()->id);
+        }
+
         if ($status > 0) {
             $query->where('status', $status);
         } else {
@@ -1449,6 +1496,10 @@ class MoneyComesBackRepo extends BaseRepo
             $query->where('status', '!=', Constants::USER_STATUS_DELETED);
         }
 
+        if (auth()->user()->account_type == Constants::ACCOUNT_TYPE_STAFF) {
+            $query->where('created_by', auth()->user()->id);
+        }
+
         // Tính tổng của từng trường cần thiết
         $total = [
             'total_price' => (int)$query->sum('total_price'),
@@ -1472,6 +1523,10 @@ class MoneyComesBackRepo extends BaseRepo
         $tran->whereNull('time_end');
         $tran->where('status', Constants::USER_STATUS_LOCKED);
 
+        if (auth()->user()->account_type == Constants::ACCOUNT_TYPE_STAFF) {
+            $tran->where('created_by', auth()->user()->id);
+        }
+
         return $tran->get()->toArray();
     }
 
@@ -1486,11 +1541,14 @@ class MoneyComesBackRepo extends BaseRepo
 
     public function getProfitsMoney($startDate, $endDate)
     {
-        return MoneyComesBack::selectRaw('DATE(time_end) as date, SUM(total_price * (fee_agent - fee) / 100) as profit_money')
-            ->whereBetween('time_end', [$startDate, $endDate])
-            ->where('status', Constants::USER_STATUS_ACTIVE)
-            ->where('agent_id', '!=', 0)
-            ->groupBy('date')
-            ->get();
+        $query = MoneyComesBack::selectRaw('DATE(time_end) as date, SUM(total_price * (fee_agent - fee) / 100) as profit_money')
+        ->whereBetween('time_end', [$startDate, $endDate])
+        ->where('status', Constants::USER_STATUS_ACTIVE)
+        ->where('agent_id', '!=', 0);
+
+        if (auth()->user()->account_type == Constants::ACCOUNT_TYPE_STAFF) {
+            $query->where('created_by', auth()->user()->id);
+        }
+        return $query->groupBy('date')->get();
     }
 }
