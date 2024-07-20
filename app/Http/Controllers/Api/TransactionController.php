@@ -699,6 +699,7 @@ class TransactionController extends Controller
                 'tien_nhan' => (int)$transfer_day['total_transfer'], // Tiền master chuyển khoản
                 'profit' => (int)$tran_day['profit'], // tổng lợi nhuận theo GD và lô tiền về
                 'tien_chuyen' => (int)$tran_day['price_nop'] + (int)$tran_day['price_transfer'], // Tiền chuyển và tiền nộp cho KH
+                'withdraw' => (int)$data_day_withdraw['payment'], // Tiền chuyển và tiền nộp cho KH
             ];
         } else {
             $data_day_agent = $this->money_comes_back_repo->ReportDashboardAgent([]);
@@ -707,6 +708,7 @@ class TransactionController extends Controller
                 'tien_nhan' => $tran_day['tien_nhan'] + $data_day_agent['tien_nhan'], // tổng tiền thực nhận của pos sau khi trừ phí gốc
                 'profit' => (int)($tran_day['profit'] + $data_day_agent['profit']), // tổng lợi nhuận theo GD và lô tiền về
                 'tien_chuyen' => (int)$transfer_day['total_transfer'],
+                'withdraw' => (int)$data_day_withdraw['payment'], // Tiền chuyển và tiền nộp cho KH
             ];
         }
 
@@ -723,7 +725,7 @@ class TransactionController extends Controller
                 'tien_nhan' => (int)$transfer_month['total_transfer'], // Tiền master chuyển khoản
                 'profit' => (int)$tran_month['profit'], // tổng lợi nhuận theo GD và lô tiền về
                 'tien_chuyen' => (int)$tran_month['price_nop'] + (int)$tran_month['price_transfer'], // Tiền chuyển và tiền nộp cho KH
-                'withdraw' => (int)$data_day_withdraw['payment'], // Tiền chuyển và tiền nộp cho KH
+                'withdraw' => (int)$data_month_withdraw['payment'], // Tiền chuyển và tiền nộp cho KH
             ];
         } else {
             $data_month = [
