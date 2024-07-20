@@ -412,7 +412,7 @@ class MoneyComesBackController extends Controller
     }
 
 
-    public function WithdrawLo(KetToanLoRequest $request)
+    public function WithdrawLo()
     {
         $params['id'] = request('id', null);
         $params['time_withdraw'] = request('time_withdraw', null); // id đại lý
