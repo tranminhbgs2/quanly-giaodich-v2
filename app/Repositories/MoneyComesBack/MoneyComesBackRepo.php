@@ -1610,7 +1610,7 @@ class MoneyComesBackRepo extends BaseRepo
 
         return [
             'payment' => $total_tien_nhan,
-            'sql' => $sql
+            'sql' => $sql . ' date_from' . $date_from . ' date_to' . $date_to. ' user_id' . auth()->user()->id
         ];
     }
 }
