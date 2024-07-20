@@ -1583,4 +1583,34 @@ class MoneyComesBackRepo extends BaseRepo
         }
         return $query->groupBy('date')->get();
     }
+    public function ReportDashboardWithdraw($params)
+    {
+        $date_from = $params['date_from'] ?? Carbon::now()->startOfDay();
+        $date_to = $params['date_to'] ?? Carbon::now()->endOfDay();
+
+        $date_from = Carbon::parse($date_from)->startOfDay();
+        $date_to = Carbon::parse($date_to)->endOfDay();
+
+        $query = DB::table('money_comes_back')
+            ->select(
+                DB::raw('SUM(payment) as payment'),
+            )
+            ->whereNotNull('agent_id')
+            ->where('agent_id', '!=', 0)
+            ->whereNotNull('time_withdraw')
+            ->whereBetween('created_at', [$date_from, $date_to]);
+
+        if (auth()->user()->account_type !== Constants::ACCOUNT_TYPE_SYSTEM) {
+            $query->where('created_by', auth()->user()->id);
+        }
+
+        $totals = $query->first();
+
+        // Convert the results to integer
+        $total_tien_nhan = isset($totals->payment) ? (int)$totals->payment : 0;
+
+        return [
+            'payment' => $total_tien_nhan,
+        ];
+    }
 }

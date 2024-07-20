@@ -691,6 +691,7 @@ class TransactionController extends Controller
     {
         $tran_day = $this->tran_repo->ReportDashboard([]);
         $transfer_day = $this->transfer_repo->getTotalMaster([]);
+        $data_day_withdraw = $this->money_comes_back_repo->ReportDashboardWithdraw([]);
 
         if (!in_array(auth()->user()->account_type, [Constants::ACCOUNT_TYPE_SYSTEM, Constants::ACCOUNT_TYPE_ACCOUNTANT])) {
             $data_day = [
@@ -714,6 +715,7 @@ class TransactionController extends Controller
         $tran_month = $this->tran_repo->ReportDashboard($params);
         $transfer_month = $this->transfer_repo->getTotalMaster($params);
         $data_month_agent = $this->money_comes_back_repo->ReportDashboardAgent($params);
+        $data_month_withdraw = $this->money_comes_back_repo->ReportDashboardWithdraw([$params]);
 
         if (!in_array(auth()->user()->account_type, [Constants::ACCOUNT_TYPE_SYSTEM, Constants::ACCOUNT_TYPE_ACCOUNTANT])) {
             $data_month = [
@@ -721,6 +723,7 @@ class TransactionController extends Controller
                 'tien_nhan' => (int)$transfer_month['total_transfer'], // Tiền master chuyển khoản
                 'profit' => (int)$tran_month['profit'], // tổng lợi nhuận theo GD và lô tiền về
                 'tien_chuyen' => (int)$tran_month['price_nop'] + (int)$tran_month['price_transfer'], // Tiền chuyển và tiền nộp cho KH
+                'withdraw' => (int)$data_day_withdraw['payment'], // Tiền chuyển và tiền nộp cho KH
             ];
         } else {
             $data_month = [
@@ -728,6 +731,7 @@ class TransactionController extends Controller
                 'tien_nhan' => (int)($tran_month['tien_nhan'] + $data_month_agent['tien_nhan']), // tổng tiền thực nhận của pos sau khi trừ phí gốc
                 'profit' => (int)($tran_month['profit'] + $data_month_agent['profit']), // tổng lợi nhuận theo GD và lô tiền về
                 'tien_chuyen' => (int)$transfer_month['total_transfer'],
+                'withdraw' => (int)$data_month_withdraw['payment'],
             ];
         }
 

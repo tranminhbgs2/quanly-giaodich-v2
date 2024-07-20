@@ -1,0 +1,14 @@
+[2024-07-20 15:13:32] local.ERROR: Uncaught Error: Call to undefined method Illuminate\Database\MySqlConnection::first() in D:\OneDrive\Code Work\laravel\work\quanly-giaodich-v2\vendor\laravel\framework\src\Illuminate\Database\DatabaseManager.php:442
+Stack trace:
+#0 D:\OneDrive\Code Work\laravel\work\quanly-giaodich-v2\vendor\laravel\framework\src\Illuminate\Support\Facades\Facade.php(261): Illuminate\Database\DatabaseManager->__call('first', Array)
+#1 Command line code(1): Illuminate\Support\Facades\Facade::__callStatic('first', Array)
+#2 {main}
+  thrown {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Uncaught Error: Call to undefined method Illuminate\\Database\\MySqlConnection::first() in D:\\OneDrive\\Code Work\\laravel\\work\\quanly-giaodich-v2\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\DatabaseManager.php:442
+Stack trace:
+#0 D:\\OneDrive\\Code Work\\laravel\\work\\quanly-giaodich-v2\\vendor\\laravel\\framework\\src\\Illuminate\\Support\\Facades\\Facade.php(261): Illuminate\\Database\\DatabaseManager->__call('first', Array)
+#1 Command line code(1): Illuminate\\Support\\Facades\\Facade::__callStatic('first', Array)
+#2 {main}
+  thrown at D:\\OneDrive\\Code Work\\laravel\\work\\quanly-giaodich-v2\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\DatabaseManager.php:442)
+[stacktrace]
+#0 {main}
+"} 
