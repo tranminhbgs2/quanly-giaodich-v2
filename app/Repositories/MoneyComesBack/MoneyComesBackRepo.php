@@ -67,6 +67,18 @@ class MoneyComesBackRepo extends BaseRepo
                     // Handle invalid date format
                 }
             }
+        } elseif ($status == Constants::USER_STATUS_DELETED) {
+            if ($date_from && $date_to && strtotime($date_from) <= strtotime($date_to) && !empty($date_from) && !empty($date_to)) {
+                try {
+                    $date_from = Carbon::createFromFormat('Y-m-d H:i:s', $date_from)->startOfDay();
+                    if (Carbon::parse($date_to)->format('H:i:s') == '00:00:00') {
+                        $date_to = Carbon::createFromFormat('Y-m-d H:i:s', $date_to)->endOfDay();
+                    }
+                    $query->whereBetween('time_withdraw', [$date_from, $date_to]);
+                } catch (\Exception $e) {
+                    // Handle invalid date format
+                }
+            }
         } else {
             if ($date_from && $date_to && strtotime($date_from) <= strtotime($date_to) && !empty($date_from) && !empty($date_to)) {
                 try {
@@ -100,7 +112,11 @@ class MoneyComesBackRepo extends BaseRepo
         // $query->whereNull('agent_id');
 
         if ($status > 0) {
-            $query->where('status', $status);
+            if($status == Constants::USER_STATUS_DELETED) {
+                $query->whereNotNull('time_withdraw');
+            } else {
+                $query->where('status', $status);
+            }
         } else {
             $query->where('status', '!=', Constants::USER_STATUS_DELETED);
         }
@@ -876,6 +892,18 @@ class MoneyComesBackRepo extends BaseRepo
                     // Handle invalid date format
                 }
             }
+        } elseif ($status == Constants::USER_STATUS_DELETED) {
+            if ($date_from && $date_to && strtotime($date_from) <= strtotime($date_to) && !empty($date_from) && !empty($date_to)) {
+                try {
+                    $date_from = Carbon::createFromFormat('Y-m-d H:i:s', $date_from)->startOfDay();
+                    if (Carbon::parse($date_to)->format('H:i:s') == '00:00:00') {
+                        $date_to = Carbon::createFromFormat('Y-m-d H:i:s', $date_to)->endOfDay();
+                    }
+                    $query->whereBetween('time_withdraw', [$date_from, $date_to]);
+                } catch (\Exception $e) {
+                    // Handle invalid date format
+                }
+            }
         } else {
             if ($date_from && $date_to && strtotime($date_from) <= strtotime($date_to) && !empty($date_from) && !empty($date_to)) {
                 try {
@@ -910,7 +938,11 @@ class MoneyComesBackRepo extends BaseRepo
         // $query->whereNull('agent_id');
 
         if ($status > 0) {
-            $query->where('status', $status);
+            if($status == Constants::USER_STATUS_DELETED) {
+                $query->whereNotNull('time_withdraw');
+            } else {
+                $query->where('status', $status);
+            }
         } else {
             $query->where('status', '!=', Constants::USER_STATUS_DELETED);
         }
