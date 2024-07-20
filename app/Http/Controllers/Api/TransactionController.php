@@ -700,7 +700,6 @@ class TransactionController extends Controller
                 'profit' => (int)$tran_day['profit'], // tổng lợi nhuận theo GD và lô tiền về
                 'tien_chuyen' => (int)$tran_day['price_nop'] + (int)$tran_day['price_transfer'], // Tiền chuyển và tiền nộp cho KH
                 'withdraw' => (int)$data_day_withdraw['payment'], // Tiền chuyển và tiền nộp cho KH
-                'sql' => $data_day_withdraw['sql'], // Tiền chuyển và tiền nộp cho KH
             ];
         } else {
             $data_day_agent = $this->money_comes_back_repo->ReportDashboardAgent([]);
@@ -727,7 +726,6 @@ class TransactionController extends Controller
                 'profit' => (int)$tran_month['profit'], // tổng lợi nhuận theo GD và lô tiền về
                 'tien_chuyen' => (int)$tran_month['price_nop'] + (int)$tran_month['price_transfer'], // Tiền chuyển và tiền nộp cho KH
                 'withdraw' => (int)$data_month_withdraw['payment'], // Tiền chuyển và tiền nộp cho KH
-                'sql' => $data_month_withdraw['sql'], // Tiền chuyển và tiền nộp cho KH
             ];
         } else {
             $data_month = [

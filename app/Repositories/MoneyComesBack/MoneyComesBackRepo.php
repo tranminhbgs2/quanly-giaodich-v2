@@ -1595,15 +1595,13 @@ class MoneyComesBackRepo extends BaseRepo
             ->select(
                 DB::raw('SUM(payment) as payment'),
             )
-            ->whereNotNull('agent_id')
-            ->where('agent_id', '!=', 0)
+            ->where('agent_id', 0)
             ->whereNull('time_withdraw')
             ->whereBetween('created_at', [$date_from, $date_to]);
 
         if (auth()->user()->account_type !== Constants::ACCOUNT_TYPE_SYSTEM) {
             $query->where('created_by', auth()->user()->id);
         }
-        $sql = $query->toSql();
         $totals = $query->first();
 
         // Convert the results to integer
@@ -1611,7 +1609,6 @@ class MoneyComesBackRepo extends BaseRepo
 
         return [
             'payment' => $total_tien_nhan,
-            'sql' => $sql
         ];
     }
 }
