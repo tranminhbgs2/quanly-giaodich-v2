@@ -1597,7 +1597,7 @@ class MoneyComesBackRepo extends BaseRepo
             )
             ->whereNotNull('agent_id')
             ->where('agent_id', '!=', 0)
-            ->whereNotNull('time_withdraw')
+            ->whereNull('time_withdraw')
             ->whereBetween('created_at', [$date_from, $date_to]);
 
         if (auth()->user()->account_type !== Constants::ACCOUNT_TYPE_SYSTEM) {
