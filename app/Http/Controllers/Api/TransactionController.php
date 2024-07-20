@@ -718,7 +718,7 @@ class TransactionController extends Controller
         $tran_month = $this->tran_repo->ReportDashboard($params);
         $transfer_month = $this->transfer_repo->getTotalMaster($params);
         $data_month_agent = $this->money_comes_back_repo->ReportDashboardAgent($params);
-        $data_month_withdraw = $this->money_comes_back_repo->ReportDashboardWithdraw([$params]);
+        $data_month_withdraw = $this->money_comes_back_repo->ReportDashboardWithdraw($params);
 
         if (!in_array(auth()->user()->account_type, [Constants::ACCOUNT_TYPE_SYSTEM, Constants::ACCOUNT_TYPE_ACCOUNTANT])) {
             $data_month = [
