@@ -1602,15 +1602,13 @@ class MoneyComesBackRepo extends BaseRepo
         if (auth()->user()->account_type !== Constants::ACCOUNT_TYPE_SYSTEM) {
             $query->where('created_by', auth()->user()->id);
         }
-        $sql = $query->toSql();
         $totals = $query->first();
 
         // Convert the results to integer
         $total_tien_nhan = isset($totals->payment) ? (int)$totals->payment : 0;
 
         return [
-            'payment' => $total_tien_nhan,
-            'sql' => $sql . ' date_from' . $date_from . ' date_to' . $date_to. ' user_id' . auth()->user()->id
+            'payment' => $total_tien_nhan
         ];
     }
 }
