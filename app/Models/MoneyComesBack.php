@@ -11,7 +11,7 @@ class MoneyComesBack extends Model
     use SoftDeletes; // Thêm dòng này để sử dụng Soft Deletes
     protected $table = Constants::TABLE_MONEY_COMES_BACK;
     public $timestamps = true;
-    protected $appends = ['profit', 'status_ket_toan', 'status_rut_tien'];
+    protected $appends = ['profit', 'status_name'];
 
     protected $fillable = [
         'agent_id',
@@ -78,20 +78,15 @@ class MoneyComesBack extends Model
         return date('Y/m/d H:i:s', strtotime($this->attributes['time_withdraw']));
     }
 
-    public function getStatusKetToanAttribute()
-    {
-        if (!empty($this->time_end)) {
-            return 'Đã kết toán';
-        }
-        return 'Chưa kết toán';
-    }
-
-    public function getStatusRutTienAttribute()
+    public function getStatusNameAttribute()
     {
         if (!empty($this->time_withdraw)) {
             return 'Đã rút tiền';
         }
-        return 'Chưa rút tiền';
+        if (!empty($this->time_end)) {
+            return 'Đã kết toán';
+        }
+        return 'Chưa kết toán';
     }
 
     public function getTotalPriceAttribute()
