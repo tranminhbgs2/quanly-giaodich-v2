@@ -330,6 +330,10 @@ class PosRepo extends BaseRepo
         if ($method) {
             $query->where('method', $method);
         }
+        if(auth()->user()->account_type == Constants::ACCOUNT_TYPE_STAFF) {
+            $query->where('created_by', auth()->user()->id);
+        }
+        $query->orderBy('id', 'DESC');
         return $query->get()->toArray();
     }
 
