@@ -89,6 +89,7 @@ class CategoryController extends Controller
         $params['note'] = request('note', null); // máy pos
         $params['fee'] = floatval(request('fee', 0)); // phí
         $params['status'] = request('status', Constants::USER_STATUS_ACTIVE); // trạng thái
+        $params['created_by'] = auth()->user()->id; // trạng thái
 
 
         $resutl = $this->cate_repo->store($params);
@@ -136,6 +137,7 @@ class CategoryController extends Controller
             $params['note'] = request('note', null); // máy pos
             $params['fee'] = floatval(request('fee', 0)); // phí
             $params['status'] = request('status', Constants::USER_STATUS_ACTIVE);
+            $params['created_by'] = auth()->user()->id; // trạng thái
 
             $resutl = $this->cate_repo->update($params, $params['id']);
 
