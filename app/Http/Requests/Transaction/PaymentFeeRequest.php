@@ -76,16 +76,16 @@ class PaymentFeeRequest extends FormRequest
                     if ($dep->method == "DAO_HAN" && ($dep->total_fee - $dep->fee_paid) < $this->request->get('fee_paid') && $dep->status_fee == 2) {
                         $validator->errors()->add('check_exist', 'Phí thanh toán không được lớn hơn phí còn lại');
                     }
-                    if ($dep->method != "DAO_HAN") {
-                        $dep_bank = BankAccounts::where('type', Constants::ACCOUNT_TYPE_STAFF)->where('staff_id', auth()->user()->id)->first();
-                        if ($dep_bank) {
-                            if ($dep_bank->balance < $dep->price_transfer) {
-                                $validator->errors()->add('check_exist', 'Số dư không đủ');
-                            }
-                        } else {
-                            $validator->errors()->add('check_exist', 'Nhân viên chưa thêm tài khoản ngân hàng');
-                        }
-                    }
+                    // if ($dep->method != "DAO_HAN") {
+                    //     $dep_bank = BankAccounts::where('type', Constants::ACCOUNT_TYPE_STAFF)->where('staff_id', auth()->user()->id)->first();
+                    //     if ($dep_bank) {
+                    //         if ($dep_bank->balance < $dep->price_transfer) {
+                    //             $validator->errors()->add('check_exist', 'Số dư không đủ');
+                    //         }
+                    //     } else {
+                    //         $validator->errors()->add('check_exist', 'Nhân viên chưa thêm tài khoản ngân hàng');
+                    //     }
+                    // }
                 }
             } else {
                 $validator->errors()->add('check_exist', 'Không tìm thấy giao dịch khách lẻ');
