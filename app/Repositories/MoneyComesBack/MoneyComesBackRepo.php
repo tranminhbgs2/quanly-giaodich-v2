@@ -696,14 +696,14 @@ class MoneyComesBackRepo extends BaseRepo
                     // Xóa lô tiền về thì trừ đi tiền pos tồn
                     $pos = Pos::where('id', $moneyComesBack->pos_id)->first();
                     if ($pos) {
-                        $pos_balance = $pos->price_pos - ($moneyComesBack->total_price - ($pos->total_fee * $moneyComesBack->total_price) / 100);
+                        $pos_balance = $pos->price_pos - ($moneyComesBack->total_price - ($moneyComesBack->fee * $moneyComesBack->total_price) / 100);
                         $pos_repo = new PosRepo();
                         $pos_repo->updatePricePos($pos_balance, $pos->id, "DELETE_MONEY_COMES_BACK_" . $id);
                     }
                     $hkd_repo = new HoKinhDoanhRepo();
                     $hkd = $hkd_repo->getById($moneyComesBack->hkd_id);
                     if ($hkd) {
-                        $hkd_balance = $hkd->price_pos - ($moneyComesBack->total_price - ($pos->total_fee * $moneyComesBack->total_price) / 100);
+                        $hkd_balance = $hkd->price_pos - ($moneyComesBack->total_price - ($moneyComesBack->fee * $moneyComesBack->total_price) / 100);
                         $hkd_repo->updateBalance($hkd_balance, $hkd->id, "DELETE_MONEY_COMES_BACK_" . $id);
                     }
                     $agent_old = Agent::where('id', $moneyComesBack->agent_id)->first();
