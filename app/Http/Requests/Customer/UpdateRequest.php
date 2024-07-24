@@ -3,8 +3,7 @@
 namespace App\Http\Requests\Customer;
 
 use App\Helpers\Constants;
-use App\Models\User;
-use App\Rules\CurrentDateLimitRule;
+use App\Models\Customer;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -30,32 +29,12 @@ class UpdateRequest extends FormRequest
     {
         $rule = [
             'id' => ['required', 'integer', 'min:1'],
-            'fullname' => ['required', 'max:50'],
-            'email' => ['nullable', 'email', 'max:100'],
-            'phone' => [
-                function ($attribute, $value, $fail) {
-                    if (validateMobile($value)) {
-                        $user = User::where('phone', formatMobile($value))
-                            ->whereNotIn('id', [$this->input('id')])
-                            ->withTrashed()
-                            ->first();
-
-                        if ($user) {
-                            return $fail('Số điện thoại đã được đăng ký');
-                        }
-                    } else {
-                        return $fail('Số điện thoại không đúng định dạng (09x/9x/849x)');
-                    }
-                },
-            ],
-            'birthday' => [
-                'date_format:d/m/Y'
-            ],
-            'status' => [
-                'in:1,2,3'
-            ],
-            'action_ids' => 'required|array',
-            'action_ids.*' => 'exists:positions,id',
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['email', 'max:255'],
+            'phone' => ['string', 'max:255'],
+            'address' => ['string', 'max:255'],
+            'note' => ['nullable', 'string', 'max:255'],
+            'status' => ['integer', 'in:' . Constants::USER_STATUS_ACTIVE . ',' . Constants::USER_STATUS_DELETED . ',' . Constants::USER_STATUS_LOCKED ],
         ];
 
         return $rule;
@@ -64,11 +43,12 @@ class UpdateRequest extends FormRequest
     public function attributes()
     {
         return [
-            'fullname' => 'Họ và tên',
+            'id' => 'ID',
+            'name' => 'Tên khách hàng',
             'email' => 'Email',
             'phone' => 'Số điện thoại',
-            'birthday' => 'Ngày sinh',
-
+            'address' => 'Địa chỉ',
+            'note' => 'Ghi chú',
         ];
     }
 
@@ -76,24 +56,27 @@ class UpdateRequest extends FormRequest
     {
         return [
             'id.required' => 'Truyền thiếu tham số id',
-            'id.integer' => 'Mã khách hàng phải là số nguyên dương',
-            'id.min' => 'Mã khách hàng phải là số nguyên dương, nhỏ nhất là 1',
+            'id.integer' => 'Tham số id phải là số nguyên',
+            'id.min' => 'Tham số id tối thiểu phải là :min',
 
-            'fullname.required' => 'Truyền thiếu tham số fullname',
-            'fullname.max' => 'Họ và tên không được vượt quá 50 ký tự',
+            'name.required' => 'Truyền thiếu tham số name',
+            'name.string' => 'Tham số name phải là chuỗi',
+            'name.max' => 'Tham số name tối đa :max ký tự',
 
-            'email.email' => 'Email không đúng định dạng',
-            'email.max' => 'Email không được vượt quá 100 ký tự',
+            'email.required' => 'Truyền thiếu tham số email',
+            'email.email' => 'Tham số email không đúng định dạng',
+            'email.max' => 'Tham số email tối đa :max ký tự',
 
             'phone.required' => 'Truyền thiếu tham số phone',
+            'phone.string' => 'Tham số phone phải là chuỗi',
+            'phone.max' => 'Tham số phone tối đa :max ký tự',
 
-            'birthday.date_format' => 'Ngày sinh không đúng định dạng d/m/Y',
+            'address.required' => 'Truyền thiếu tham số address',
+            'address.string' => 'Tham số address phải là chuỗi',
+            'address.max' => 'Tham số address tối đa :max ký tự',
 
-            'status.required' => 'Truyền thiếu tham số status',
-            'status.in' => 'Trạng thái không hợp lệ',
-            'action_ids.required' => 'Truyền thiếu tham số action_ids',
-            'action_ids.array' => 'Tham số action_ids phải là mảng',
-            'action_ids.*.exists' => 'Một hoặc nhiều action_id không tồn tại',
+            'note.string' => 'Tham số note phải là chuỗi',
+            'note.max' => 'Tham số note tối đa :max ký tự',
         ];
     }
 
@@ -104,25 +87,13 @@ class UpdateRequest extends FormRequest
     {
         $validator->after(function ($validator) {
             // Check tồn tại
-            $user = User::where('id', $this->request->get('id'))->withTrashed()->first();
+            $user = Customer::where('id', $this->request->get('id'))->withTrashed()->first();
             if ($user) {
                 if ($user->status == Constants::USER_STATUS_DELETED) {
-                    $validator->errors()->add('check_exist', 'Thông tin nhân viên đã bị khóa vĩnh viễn, không thể cập nhật');
+                    $validator->errors()->add('check_exist', 'Thông tin khách hàng đã bị khóa vĩnh viễn, không thể cập nhật');
                 }
             } else {
-                $validator->errors()->add('check_exist', 'Không tìm thấy thông tin nhân viên');
-            }
-
-            // Check theo email
-            if ($this->request->get('email')) {
-                $user = User::where('email', $this->request->get('email'))
-                    ->whereNotIn('id', [$this->request->get('id')])
-                    ->whereNotNull('email')
-                    ->withTrashed()
-                    ->first();
-                if ($user) {
-                    $validator->errors()->add('check_exist', 'Email đã được đăng ký');
-                }
+                $validator->errors()->add('check_exist', 'Không tìm thấy thông tin khách hàng');
             }
         });
     }

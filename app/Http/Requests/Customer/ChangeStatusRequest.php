@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Requests\User;
+namespace App\Http\Requests\Customer;
 
 use App\Helpers\Constants;
-use App\Models\User;
+use App\Models\Customer;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -29,10 +29,7 @@ class ChangeStatusRequest extends FormRequest
     {
         $rule = [
             'id' => ['required', 'integer', 'min:1'],
-            'status' => [
-                'required',
-                'in:0,1,2,3'
-            ],
+            'status' => ['required', 'integer', 'in:' . Constants::USER_STATUS_ACTIVE . ',' . Constants::USER_STATUS_DELETED . ',' . Constants::USER_STATUS_LOCKED ],
         ];
 
         return $rule;
@@ -41,7 +38,7 @@ class ChangeStatusRequest extends FormRequest
     public function attributes()
     {
         return [
-            //
+            'status' => 'Trạng thái',
         ];
     }
 
@@ -49,11 +46,11 @@ class ChangeStatusRequest extends FormRequest
     {
         return [
             'id.required' => 'Truyền thiếu tham số id',
-            'id.integer' => 'Mã nhân viên phải là số nguyên dương',
-            'id.min' => 'Mã nhân viên phải là số nguyên dương, nhỏ nhất là 1',
+            'id.integer' => 'Mã giao dịch phải là số nguyên dương',
+            'id.min' => 'Mã giao dịch phải là số nguyên dương, nhỏ nhất là 1',
 
-            'status.required' => 'Truyền thiếu tham số status',
-            'status.in' => 'Trạng thái không hợp lệ (0/1/2/3)',
+            'status.integer' => 'Trạng thái phải là số nguyên',
+            'status.in' => 'Trạng thái không hợp lệ',
         ];
     }
 
@@ -64,15 +61,14 @@ class ChangeStatusRequest extends FormRequest
     {
         $validator->after(function ($validator) {
             // Check tồn tại
-            $user = User::where('id', $this->request->get('id'))->withTrashed()->first();
-            if ($user) {
-                if ($user->status == Constants::USER_STATUS_DELETED) {
-                    $validator->errors()->add('check_exist', 'Thông tin nhân viên đã bị xóa vĩnh viễn, không thể cập nhật');
+            $dep = Customer::where('id', $this->request->get('id'))->withTrashed()->first();
+            if ($dep) {
+                if ($dep->status == Constants::USER_STATUS_DELETED) {
+                    $validator->errors()->add('check_exist', 'Khách hàng đã bị xóa');
                 }
             } else {
-                $validator->errors()->add('check_exist', 'Không tìm thấy thông tin nhân viên');
+                $validator->errors()->add('check_exist', 'Không tìm thấy Khách hàng');
             }
-
         });
     }
 

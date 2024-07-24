@@ -10,6 +10,8 @@ class Constants
     const TABLE_ANNOUNCEMENT_USER = 'announcement_user';
     const TABLE_ANNOUNCEMENTS = 'announcements';
     const TABLE_BANKS = 'banks';
+    const TABLE_CUSTOMER = 'customers';
+    const TABLE_CARD = 'cards';
     const TABLE_CRONTJOBS = 'crontjobs';
     const TABLE_DEPARTMENTS = 'departments';
     const TABLE_DEVICES = 'devices';

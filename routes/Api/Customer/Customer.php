@@ -11,8 +11,9 @@ Route::group(['prefix' => 'customers'], function (){
         Route::get('/', 'CustomerController@getListing');
         Route::get('/detail/{id}', 'CustomerController@getDetail');
         Route::post('/store', 'CustomerController@store');
-        Route::post('/update/{id}', 'CustomerController@update');
-        Route::post('/delete/{id}', 'CustomerController@delete');
+        Route::post('/update', 'CustomerController@update');
+        Route::get('/delete/{id}', 'CustomerController@delete');
+        Route::post('/change-status', 'CustomerController@changeStatus');
 
     });
 

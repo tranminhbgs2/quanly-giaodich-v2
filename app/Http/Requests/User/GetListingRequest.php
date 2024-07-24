@@ -1,16 +1,13 @@
 <?php
 
-namespace App\Http\Requests\Customer;
+namespace App\Http\Requests\User;
 
 use App\Helpers\Constants;
-use App\Models\User;
-use App\Rules\CurrentDateLimitRule;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Support\Facades\Auth;
 
-class CusUpdateAvatarRequest extends FormRequest
+class GetListingRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -29,37 +26,40 @@ class CusUpdateAvatarRequest extends FormRequest
      */
     public function rules()
     {
-        $rules = [
-            'avatar' => ['required', 'image'],
-            'platform' => [
-                'required',
-                'in:' . Constants::PLATFORM
-            ]
+        return [
+            'keyword' => [],
+            'status' => [
+                'in:0,1,2,3'
+            ],
+            'page_index' => 'integer|min:1|required_with:page_size',
+            'page_size' => 'integer|min:1|required_with:page_index',
         ];
-
-        // Nếu nhập ngày cấp thì sẽ kiểm tra định dạng
-        if ($this->request->get('issue_date')) {
-            $rules['issue_date'] = [
-                'date_format:d/m/Y',
-                new CurrentDateLimitRule()
-            ];
-        }
-
-        return $rules;
     }
 
+    /**
+     * @return array
+     */
     public function attributes()
     {
-        return [
-            'avatar' => 'Ảnh đại diện',
-        ];
+        return [];
     }
 
+    /**
+     * @return array
+     */
     public function messages()
     {
         return [
-            'avatar.required' => 'Truyền thiếu tham số avatar',
-            'avatar.image' => 'Ảnh đại diện không đúng định dạng (.jpg, .png)',
+            'status.required' => 'Truyền thiếu tham số status',
+            'status.in' => 'Status là một trong các giá trị: -1,0,1,2,3',
+
+            'page_index.integer' => 'Tham số page_index phải là số nguyên',
+            'page_index.min' => "Tham số page_index tối thiểu phải là :min",
+            'page_index.required_with' => 'Truyền thiếu tham số page_index',
+
+            'page_size.integer' => 'Tham số page_size phải là số nguyên',
+            'page_size.min' => "Tham số page_size tối thiểu phải là :min",
+            'page_size.required_with' => 'Truyền thiếu tham số page_size',
 
             'platform.required' => 'Truyền thiếu tham số platform',
             'platform.in' => 'Platform là một trong các giá trị ' . Constants::PLATFORM,
@@ -72,7 +72,6 @@ class CusUpdateAvatarRequest extends FormRequest
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
-            //
         });
     }
 

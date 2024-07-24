@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Requests\Customer;
+namespace App\Http\Requests\Card;
 
-use App\Helpers\Constants;
+use App\Models\Card;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class GetListingRequest extends FormRequest
+class GetDetailRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,14 +26,7 @@ class GetListingRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            'keyword' => [],
-            'status' => [
-                'in:0,1,2,3'
-            ],
-            'page_index' => 'integer|min:1|required_with:page_size',
-            'page_size' => 'integer|min:1|required_with:page_index',
-        ];
+        return [];
     }
 
     /**
@@ -49,18 +42,7 @@ class GetListingRequest extends FormRequest
      */
     public function messages()
     {
-        return [
-            'status.required' => 'Truyền thiếu tham số status',
-            'status.in' => 'Status là một trong các giá trị: -1,0,1,2,3',
-
-            'page_index.integer' => 'Tham số page_index phải là số nguyên',
-            'page_index.min' => "Tham số page_index tối thiểu phải là :min",
-            'page_index.required_with' => 'Truyền thiếu tham số page_index',
-
-            'page_size.integer' => 'Tham số page_size phải là số nguyên',
-            'page_size.min' => "Tham số page_size tối thiểu phải là :min",
-            'page_size.required_with' => 'Truyền thiếu tham số page_size',
-        ];
+        return [];
     }
 
     /**
@@ -69,6 +51,13 @@ class GetListingRequest extends FormRequest
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
+            // Check sự tồn tại
+            if ($this->request->get('id') > 0) {
+                $user = Card::where('id', $this->request->get('id'))->withTrashed()->first();
+                if (!$user) {
+                    $validator->errors()->add('check_exist', 'Không tìm thấy thông tin thẻ');
+                }
+            }
         });
     }
 

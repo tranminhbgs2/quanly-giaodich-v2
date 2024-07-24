@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Repositories\Agent\AgentRepo;
 use App\Repositories\Bank\BankRepo;
 use App\Repositories\BankAccount\BankAccountRepo;
+use App\Repositories\Card\CardRepo;
 use App\Repositories\Category\CategoryRepo;
 use App\Repositories\Category\DepartmentRepo;
 use App\Repositories\Customer\CustomerRepo;
@@ -43,6 +44,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(TransferRepo::class);
         $this->app->singleton(WithdrawPosRepo::class);
         $this->app->singleton(UserRepo::class);
+        $this->app->singleton(CardRepo::class);
 
 
     }

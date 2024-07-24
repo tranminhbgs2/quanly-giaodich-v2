@@ -1,13 +1,12 @@
 <?php
 
-namespace App\Http\Requests\Customer;
+namespace App\Http\Requests\Card;
 
-use App\Helpers\Constants;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class GetListingRequest extends FormRequest
+class StoreRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,40 +25,34 @@ class GetListingRequest extends FormRequest
      */
     public function rules()
     {
+        $rule = [
+            'customer_id' => ['integer', 'min:1'],
+            'bank_code' => ['required', 'max:50'],
+            'day' => ['integer', 'min:1'],
+        ];
+        return $rule;
+    }
+
+    public function attributes()
+    {
         return [
-            'keyword' => [],
-            'status' => [
-                'in:0,1,2,3'
-            ],
-            'page_index' => 'integer|min:1|required_with:page_size',
-            'page_size' => 'integer|min:1|required_with:page_index',
+            'customer_id' => 'ID khách hàng',
+            'bank_code' => 'Mã ngân hàng',
+            'day' => 'Ngày',
         ];
     }
 
-    /**
-     * @return array
-     */
-    public function attributes()
-    {
-        return [];
-    }
-
-    /**
-     * @return array
-     */
     public function messages()
     {
         return [
-            'status.required' => 'Truyền thiếu tham số status',
-            'status.in' => 'Status là một trong các giá trị: -1,0,1,2,3',
+            'customer_id.integer' => 'ID khách hàng phải là số nguyên',
+            'customer_id.min' => 'ID khách hàng phải là số nguyên dương, nhỏ nhất là 1',
 
-            'page_index.integer' => 'Tham số page_index phải là số nguyên',
-            'page_index.min' => "Tham số page_index tối thiểu phải là :min",
-            'page_index.required_with' => 'Truyền thiếu tham số page_index',
+            'bank_code.required' => 'Truyền thiếu tham số bank_code',
+            'bank_code.max' => 'Mã ngân hàng tối đa :max ký tự',
 
-            'page_size.integer' => 'Tham số page_size phải là số nguyên',
-            'page_size.min' => "Tham số page_size tối thiểu phải là :min",
-            'page_size.required_with' => 'Truyền thiếu tham số page_size',
+            'day.integer' => 'Ngày phải là số nguyên',
+            'day.min' => 'Ngày phải là số nguyên dương, nhỏ nhất là 1',
         ];
     }
 

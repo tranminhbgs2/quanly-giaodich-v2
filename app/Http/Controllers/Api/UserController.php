@@ -4,16 +4,15 @@ namespace App\Http\Controllers\Api;
 
 use App\Helpers\Constants;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Customer\ChangePasswordRequest;
-use App\Http\Requests\Customer\DeleteRequest;
-use App\Http\Requests\Customer\GetDetailRequest;
-use App\Http\Requests\Customer\GetListingRequest;
-use App\Http\Requests\Customer\StoreRequest;
-use App\Http\Requests\Customer\UpdateRequest;
+use App\Http\Requests\User\ChangePasswordRequest;
+use App\Http\Requests\User\DeleteRequest;
+use App\Http\Requests\User\GetDetailRequest;
+use App\Http\Requests\User\GetListingRequest;
+use App\Http\Requests\User\StoreRequest;
+use App\Http\Requests\User\UpdateRequest;
 use App\Http\Requests\User\ChangeStatusRequest;
 use App\Repositories\BankAccount\BankAccountRepo;
 use App\Repositories\Category\CategoryRepo;
-use App\Repositories\Customer\CustomerRepo;
 use App\Repositories\HoKinhDoanh\HoKinhDoanhRepo;
 use App\Repositories\Transaction\TransactionRepo;
 use App\Repositories\Transfer\TransferRepo;
@@ -26,10 +25,9 @@ class UserController extends Controller
     protected $user_repo;
     protected $cus_repo;
 
-    public function __construct(UserRepo $cateRepo, CustomerRepo $cusRepo)
+    public function __construct(UserRepo $cateRepo)
     {
         $this->user_repo = $cateRepo;
-        $this->cus_repo = $cusRepo;
     }
 
     /**

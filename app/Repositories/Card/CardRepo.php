@@ -1,19 +1,13 @@
 <?php
 
-namespace App\Repositories\Customer;
+namespace App\Repositories\Card;
 
 use App\Helpers\Constants;
-use App\Models\Customer;
-use App\Models\Fee;
-use App\Models\Student;
-use App\Models\User;
+use App\Models\Card;
 use App\Repositories\BaseRepo;
-use App\Services\Email\MailerService;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 
-class CustomerRepo extends BaseRepo
+class CardRepo extends BaseRepo
 {
     public function __construct()
     {
@@ -32,12 +26,24 @@ class CustomerRepo extends BaseRepo
     {
         $keyword = isset($params['keyword']) ? $params['keyword'] : null;
         $status = isset($params['status']) ? $params['status'] : -1;
+        $status_proccess = isset($params['status_proccess']) ? $params['status_proccess'] : -1;
+        $customer_id = isset($params['customer_id']) ? $params['customer_id'] : -1;
+        $bank_code = isset($params['bank_code']) ? $params['bank_code'] : null;
+        $type_card = isset($params['type_card']) ? $params['type_card'] : null;
+        $day = isset($params['day']) ? $params['day'] : 0;
         $page_index = isset($params['page_index']) ? $params['page_index'] : 1;
         $page_size = isset($params['page_size']) ? $params['page_size'] : 10;
-        $query = Customer::select()->when(!empty($keyword), function ($sql) use ($keyword) {
+        
+        $query = Card::select()->with([
+            'cus' => function ($sql) {
+                $sql->select(['id', 'name', 'status']);
+            },
+        ]);
+
+        $query->when(!empty($keyword), function ($sql) use ($keyword) {
             $keyword = translateKeyWord($keyword);
             return $sql->where(function ($sub_sql) use ($keyword) {
-                $sub_sql->where('name', 'LIKE', "%" . $keyword . "%")
+                $sub_sql->where('number_card', 'LIKE', "%" . $keyword . "%")
                     ->orWhere('phone', 'LIKE', "%" . $keyword . "%")
                     ->orWhere('note', 'LIKE', "%" . $keyword . "%");
             });
@@ -45,6 +51,28 @@ class CustomerRepo extends BaseRepo
 
         if ($status > 0) {
             $query->where('status', $status);
+        } else {
+            $query->where('status', Constants::USER_STATUS_ACTIVE);
+        }
+
+        if ($status_proccess > 0) {
+            $query->where('status_proccess', $status_proccess);
+        }
+
+        if ($customer_id > 0) {
+            $query->where('customer_id', $customer_id);
+        }
+
+        if (!empty($bank_code)) {
+            $query->where('bank_code', $bank_code);
+        }
+
+        if (!empty($type_card)) {
+            $query->where('type_card', $type_card);
+        }
+
+        if ($day > 0) {
+            $query->where('day', $day);
         }
 
         if ($is_counting) {
@@ -55,7 +83,6 @@ class CustomerRepo extends BaseRepo
                 $query->take($page_size)->skip($offset);
             }
         }
-
         $query->orderBy('id', 'DESC');
 
         return $query->get()->toArray();
@@ -70,11 +97,13 @@ class CustomerRepo extends BaseRepo
     public function store($params)
     {
         $fillable = [
-            'name',
-            'email',
-            'phone',
-            'address',
-            'note',
+            'customer_id',
+            'bank_code',
+            'type_card',
+            'number_card',
+            'day',
+            'limit',
+            'status_proccess',
             'status',
             'created_by',
         ];
@@ -86,8 +115,8 @@ class CustomerRepo extends BaseRepo
                 $insert[$field] = $params[$field];
             }
         }
-        if (!empty($insert['name'])) {
-            $res = Customer::create($insert);
+        if (!empty($insert['bank_code'])) {
+            $res = Card::create($insert);
             return $res->id;
         }
 
@@ -104,11 +133,13 @@ class CustomerRepo extends BaseRepo
     public function update($params, $id)
     {
         $fillable = [
-            'name',
-            'email',
-            'phone',
-            'address',
-            'note',
+            'customer_id',
+            'bank_code',
+            'type_card',
+            'number_card',
+            'day',
+            'limit',
+            'status_proccess',
             'status',
             'created_by',
         ];
@@ -121,7 +152,7 @@ class CustomerRepo extends BaseRepo
             }
         }
 
-        return Customer::where('id', $id)->update($update);
+        return Card::where('id', $id)->update($update);
     }
 
     /**
@@ -129,10 +160,10 @@ class CustomerRepo extends BaseRepo
      *
      * @param $params
      */
-    public function getDetail($params, $with_trashed=false)
+    public function getDetail($params, $with_trashed = false)
     {
         $id = isset($params['id']) ? $params['id'] : 0;
-        $tran = Customer::where('id', $id);
+        $tran = Card::where('id', $id);
 
         if ($with_trashed) {
             $tran->withTrashed();
@@ -165,7 +196,7 @@ class CustomerRepo extends BaseRepo
     public function delete($params)
     {
         $id = isset($params['id']) ? $params['id'] : null;
-        $hoKinhDoanh = Customer::find($id);
+        $hoKinhDoanh = Card::find($id);
 
         if ($hoKinhDoanh) {
             $hoKinhDoanh->status = Constants::USER_STATUS_DELETED;
@@ -174,20 +205,51 @@ class CustomerRepo extends BaseRepo
             if ($hoKinhDoanh->save()) {
                 return [
                     'code' => 200,
-                    'error' => 'Xóa khách hàng thành công',
+                    'error' => 'Xóa thẻ thành công',
                     'data' => null
                 ];
             } else {
                 return [
                     'code' => 400,
-                    'error' => 'Xóa khách hàng không thành công',
+                    'error' => 'Xóa thẻ không thành công',
                     'data' => null
                 ];
             }
         } else {
             return [
                 'code' => 404,
-                'error' => 'Không tìm thấy khách hàng',
+                'error' => 'Không tìm thấy thẻ',
+                'data' => null
+            ];
+        }
+    }
+
+    public function changeStatusProccess($params)
+    {
+        $id = isset($params['id']) ? $params['id'] : null;
+        $status_proccess = isset($params['status_proccess']) ? $params['status_proccess'] : 1;
+        $hoKinhDoanh = Card::find($id);
+
+        if ($hoKinhDoanh) {
+            $hoKinhDoanh->status_proccess = $status_proccess;
+
+            if ($hoKinhDoanh->save()) {
+                return [
+                    'code' => 200,
+                    'error' => 'Cập nhật trạng thái xử lý thẻ thành công',
+                    'data' => null
+                ];
+            } else {
+                return [
+                    'code' => 400,
+                    'error' => 'Cập nhật trạng thái xử lý thẻ không thành công',
+                    'data' => null
+                ];
+            }
+        } else {
+            return [
+                'code' => 404,
+                'error' => 'Không tìm thấy thẻ',
                 'data' => null
             ];
         }
@@ -200,7 +262,7 @@ class CustomerRepo extends BaseRepo
      */
     public function getById($id, $with_trashed = false)
     {
-        $tran = Customer::where('id', $id);
+        $tran = Card::where('id', $id);
 
         if ($with_trashed) {
             $tran->withTrashed();
@@ -213,11 +275,11 @@ class CustomerRepo extends BaseRepo
     {
         $update = ['status' => $status];
 
-        return Customer::where('id', $id)->update($update);
+        return Card::where('id', $id)->update($update);
     }
 
     public function getAll()
     {
-        return Customer::select('id', 'name', 'phone')->where('status', Constants::USER_STATUS_ACTIVE)->orderBy('id', 'DESC')->get()->toArray();
+        return Card::select('id', 'name', 'phone')->where('status', Constants::USER_STATUS_ACTIVE)->orderBy('id', 'DESC')->get()->toArray();
     }
 }

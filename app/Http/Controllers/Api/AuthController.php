@@ -10,7 +10,6 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\LogoutRequest;
 use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Models\LogAuth;
-use App\Repositories\Customer\CustomerRepo;
 use App\Repositories\OtpRepo;
 use App\Repositories\User\UserRepo;
 use App\Services\Email\MailerService;
@@ -29,10 +28,9 @@ class AuthController extends Controller
      *
      * @return void
      */
-    public function __construct(OtpRepo $otpRepository, CustomerRepo $customerRepo, UserRepo $userRepo)
+    public function __construct(OtpRepo $otpRepository, UserRepo $userRepo)
     {
         $this->otpRepository = $otpRepository;
-        $this->customer_repo = $customerRepo;
         $this->user_repo = $userRepo;
     }
 

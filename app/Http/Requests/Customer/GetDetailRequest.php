@@ -2,8 +2,7 @@
 
 namespace App\Http\Requests\Customer;
 
-use App\Helpers\Constants;
-use App\Models\User;
+use App\Models\Customer;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -54,7 +53,7 @@ class GetDetailRequest extends FormRequest
         $validator->after(function ($validator) {
             // Check sự tồn tại
             if ($this->request->get('id') > 0) {
-                $user = User::where('id', $this->request->get('id'))->withTrashed()->first();
+                $user = Customer::where('id', $this->request->get('id'))->withTrashed()->first();
                 if (!$user) {
                     $validator->errors()->add('check_exist', 'Không tìm thấy thông tin nhân viên');
                 }

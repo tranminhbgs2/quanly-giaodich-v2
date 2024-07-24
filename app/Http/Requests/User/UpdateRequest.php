@@ -3,17 +3,12 @@
 namespace App\Http\Requests\User;
 
 use App\Helpers\Constants;
-use App\Models\Department;
-use App\Models\Position;
-use App\Models\Student;
 use App\Models\User;
-use App\Rules\CurrentDateLimitRule;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Validation\Rule;
 
-class UserUpdateRequest extends FormRequest
+class UpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -34,9 +29,9 @@ class UserUpdateRequest extends FormRequest
     {
         $rule = [
             'id' => ['required', 'integer', 'min:1'],
-            'fullname' => ['required'],
+            'fullname' => ['required', 'max:50'],
+            'email' => ['nullable', 'email', 'max:100'],
             'phone' => [
-                'required',
                 function ($attribute, $value, $fail) {
                     if (validateMobile($value)) {
                         $user = User::where('phone', formatMobile($value))
@@ -52,27 +47,15 @@ class UserUpdateRequest extends FormRequest
                     }
                 },
             ],
-            'action_ids' => 'required|array',
-            'action_ids.*' => 'exists:positions,id', // Kiểm tra từng phần tử trong mảng
             'birthday' => [
-                'date_format:d/m/Y',
-                new CurrentDateLimitRule()
+                'date_format:d/m/Y'
             ],
             'status' => [
-                'required',
                 'in:1,2,3'
             ],
+            'action_ids' => 'required|array',
+            'action_ids.*' => 'exists:positions,id',
         ];
-
-        // Nếu nhập email thì check
-        if ($this->request->get('email')) {
-            $rules['email'] = ['email'];
-        }
-
-        // Nếu chọn avatar thì check
-        if ($this->request->get('avatar')) {
-            $rules['avatar'] = ['image'];
-        }
 
         return $rule;
     }
@@ -80,7 +63,11 @@ class UserUpdateRequest extends FormRequest
     public function attributes()
     {
         return [
-            //
+            'fullname' => 'Họ và tên',
+            'email' => 'Email',
+            'phone' => 'Số điện thoại',
+            'birthday' => 'Ngày sinh',
+
         ];
     }
 
@@ -88,21 +75,24 @@ class UserUpdateRequest extends FormRequest
     {
         return [
             'id.required' => 'Truyền thiếu tham số id',
-            'id.integer' => 'Mã nhân viên phải là số nguyên dương',
-            'id.min' => 'Mã nhân viên phải là số nguyên dương, nhỏ nhất là 1',
+            'id.integer' => 'Mã khách hàng phải là số nguyên dương',
+            'id.min' => 'Mã khách hàng phải là số nguyên dương, nhỏ nhất là 1',
 
             'fullname.required' => 'Truyền thiếu tham số fullname',
-            'phone.required' => 'Truyền thiếu tham số phone',
+            'fullname.max' => 'Họ và tên không được vượt quá 50 ký tự',
+
             'email.email' => 'Email không đúng định dạng',
-            'avatar.image' => 'Ảnh đại diện không đúng định dạng (.jpg, .png)',
-            'birthday.date_format' => 'Ngày sinh sai định dạng (dd/mm/yyyy)',
+            'email.max' => 'Email không được vượt quá 100 ký tự',
+
+            'phone.required' => 'Truyền thiếu tham số phone',
+
+            'birthday.date_format' => 'Ngày sinh không đúng định dạng d/m/Y',
 
             'status.required' => 'Truyền thiếu tham số status',
-            'status.in' => 'Trạng thái không hợp lệ (1/2/3)',
+            'status.in' => 'Trạng thái không hợp lệ',
             'action_ids.required' => 'Truyền thiếu tham số action_ids',
-            'action_ids.array' => 'Danh sách hành động không đúng định dạng',
-
-
+            'action_ids.array' => 'Tham số action_ids phải là mảng',
+            'action_ids.*.exists' => 'Một hoặc nhiều action_id không tồn tại',
         ];
     }
 
@@ -132,20 +122,6 @@ class UserUpdateRequest extends FormRequest
                 if ($user) {
                     $validator->errors()->add('check_exist', 'Email đã được đăng ký');
                 }
-            }
-
-            // Check mã phòng ban
-            $depart = Department::find($this->request->get('department_id'));
-            if (! $depart) {
-                $validator->errors()->add('check_exist', 'Mã phòng/ban không tồn tại');
-            }
-
-            // Check mã chức danh có thuộc phòng ban hay không
-            $pos = Position::where('id', $this->request->get('position_id'))
-                ->where('department_id', $this->request->get('department_id'))
-                ->first();
-            if (! $pos) {
-                $validator->errors()->add('check_exist', 'Mã chức danh không tồn tại hoặc không thuộc phòng/ban trên');
             }
         });
     }

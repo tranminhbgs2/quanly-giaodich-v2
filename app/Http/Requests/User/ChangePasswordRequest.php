@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http\Requests\Customer;
+namespace App\Http\Requests\User;
 
-use App\Helpers\Constants;
 use App\Models\User;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;

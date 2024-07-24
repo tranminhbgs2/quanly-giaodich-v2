@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Customer;
 
 use App\Helpers\Constants;
+use App\Models\Customer;
 use App\Models\Student;
 use App\Models\User;
 use App\Rules\PasswordRule;
@@ -31,56 +32,44 @@ class StoreRequest extends FormRequest
     public function rules()
     {
         $rule = [
-            'fullname' => ['required'],
-            'phone' => ['required'],
-            'username' => [
-                'required',
-                new UsernameRule()
-            ],
-            'password' => [
-                'required',
-            ],
-            'birthday' => [
-                'date_format:d/m/Y'
-            ],
-            'action_ids' => 'required|array',
-            'action_ids.*' => 'exists:positions,id',
+            'name' => 'required|string|max:255',
+            'email' => 'email|max:255',
+            'phone' => 'string|max:255',
+            'address' => 'string|max:255',
+            'note' => 'nullable|string|max:255',
         ];
-
-        // Nếu nhập email thì check
-        if ($this->request->get('email')) {
-            $rules['email'] = ['email'];
-        }
-
-        // Nếu nhập email thì check
-        if ($this->request->get('avatar')) {
-            $rules['avatar'] = ['image'];
-        }
-
         return $rule;
     }
 
     public function attributes()
     {
         return [
-            'username' => 'Tên tài khoản',
-            'password' => 'Mật khẩu',
+            'name' => 'Tên khách hàng',
+            'email' => 'Email',
+            'phone' => 'Số điện thoại',
+            'address' => 'Địa chỉ',
+            'note' => 'Ghi chú',
         ];
     }
 
     public function messages()
     {
         return [
-            'fullname.required' => 'Truyền thiếu tham số fullname',
-            'phone.required' => 'Truyền thiếu tham số phone',
-            'email.email' => 'Email không đúng định dạng',
+            'name.required' => 'Truyền thiếu tham số name',
+            'name.string' => 'Tham số name phải là chuỗi',
+            'name.max' => 'Tham số name tối đa :max ký tự',
 
-            'username.required' => 'Truyền thiếu tham số username',
+            'email.email' => 'Tham số email không đúng định dạng',
+            'email.max' => 'Tham số email tối đa :max ký tự',
 
-            'password.required' => 'Truyền thiếu tham số password',
-            'action_ids.required' => 'Truyền thiếu tham số action_ids',
-            'action_ids.array' => 'Tham số action_ids phải là mảng',
-            'birthday.date_format' => 'Ngày sinh không đúng định dạng d/m/Y',
+            'phone.string' => 'Tham số phone phải là chuỗi',
+            'phone.max' => 'Tham số phone tối đa :max ký tự',
+
+            'address.string' => 'Tham số address phải là chuỗi',
+            'address.max' => 'Tham số address tối đa :max ký tự',
+
+            'note.string' => 'Tham số note phải là chuỗi',
+            'note.max' => 'Tham số note tối đa :max ký tự',
         ];
     }
 
@@ -91,28 +80,10 @@ class StoreRequest extends FormRequest
     {
         $validator->after(function ($validator) {
             // Check username
-            $user = User::where('username', $this->request->get('username'))->withTrashed()->first();
+            $user = Customer::where('name', $this->request->get('name'))->withTrashed()->first();
 
             if ($user) {
-                $validator->errors()->add('check_exist', 'Tên tài khoản đã được đăng ký. Bạn vui lòng, chọn tên khác');
-            }
-
-            // Check theo phone
-            $user = User::where('phone', formatMobile($this->request->get('phone')))->whereNotNull('phone')->withTrashed()->first();
-            if ($user) {
-                $validator->errors()->add('check_exist', 'Số điện thoại đã được đăng ký. Bạn vui lòng, chọn số điện thoại khác');
-            } else {
-                if (!validateMobile($this->request->get('phone'))) {
-                    $validator->errors()->add('check_exist', 'Số điện thoại không đúng định dạng (09x/9x/849x)');
-                }
-            }
-
-            // Check theo email
-            if ($this->request->get('email')) {
-                $user = User::where('email', $this->request->get('email'))->whereNotNull('email')->withTrashed()->first();
-                if ($user) {
-                    $validator->errors()->add('check_exist', 'Email đã được đăng ký. Bạn vui lòng, chọn email khác');
-                }
+                $validator->errors()->add('check_exist', 'Tên khách hàng đã được đăng ký. Bạn vui lòng, chọn tên khác');
             }
         });
     }

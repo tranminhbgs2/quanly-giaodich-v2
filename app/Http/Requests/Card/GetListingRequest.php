@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http\Requests\Customer;
+namespace App\Http\Requests\Card;
 
-use App\Helpers\Constants;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
