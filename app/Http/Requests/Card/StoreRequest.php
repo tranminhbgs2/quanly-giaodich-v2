@@ -26,7 +26,7 @@ class StoreRequest extends FormRequest
     public function rules()
     {
         $rule = [
-            'customer_id' => ['integer', 'min:1'],
+            'customer_id' => ['integer', 'min:0'],
             'bank_code' => ['required', 'max:50'],
             'day' => ['integer', 'min:1'],
         ];

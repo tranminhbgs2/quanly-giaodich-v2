@@ -28,7 +28,7 @@ class UpdateRequest extends FormRequest
     public function rules()
     {
         $rule = [
-            'customer_id' => ['integer', 'min:1'],
+            'customer_id' => ['integer', 'min:0'],
             'bank_code' => ['required', 'max:50'],
             'day' => ['integer', 'min:1'],
             'status' => ['integer', 'in:' . Constants::USER_STATUS_ACTIVE . ',' . Constants::USER_STATUS_DELETED . ',' . Constants::USER_STATUS_LOCKED ],
