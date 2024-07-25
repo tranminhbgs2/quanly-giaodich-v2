@@ -33,7 +33,7 @@ class CardRepo extends BaseRepo
         $day = isset($params['day']) ? $params['day'] : 0;
         $page_index = isset($params['page_index']) ? $params['page_index'] : 1;
         $page_size = isset($params['page_size']) ? $params['page_size'] : 10;
-        
+
         $query = Card::select()->with([
             'cus' => function ($sql) {
                 $sql->select(['id', 'name', 'status']);
@@ -43,9 +43,7 @@ class CardRepo extends BaseRepo
         $query->when(!empty($keyword), function ($sql) use ($keyword) {
             $keyword = translateKeyWord($keyword);
             return $sql->where(function ($sub_sql) use ($keyword) {
-                $sub_sql->where('number_card', 'LIKE', "%" . $keyword . "%")
-                    ->orWhere('phone', 'LIKE', "%" . $keyword . "%")
-                    ->orWhere('note', 'LIKE', "%" . $keyword . "%");
+                $sub_sql->where('number_card', 'LIKE', "%" . $keyword . "%");
             });
         });
 
