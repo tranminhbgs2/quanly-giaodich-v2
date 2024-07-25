@@ -76,13 +76,13 @@ class CardController extends Controller
         return response()->json([
             'code' => 200,
             'error' => 'Danh sách thẻ',
-            'data' => $sorted_array,
-            'meta' => [
-                'page_index' => intval($params['page_index']),
-                'page_size' => intval($params['page_size']),
-                'records' => $total,
-                'pages' => ceil($total / $params['page_size'])
-            ]
+            'data' => [
+                "total_elements" => $total,
+                "total_page" => ceil($total / $params['page_size']),
+                "page_no" => intval($params['page_index']),
+                "page_size" => intval($params['page_size']),
+                "data" => $data,
+            ],
         ]);
     }
 
