@@ -315,7 +315,12 @@ class CardController extends Controller
     {
         // Lấy ngày hiện tại
         $currentDay = Carbon::now()->day;
-
+        if($currentDay == 1) {
+            $data = $this->card_repo->getAll(false);
+            foreach($data as $value){
+                $resutl = $this->card_repo->changeStatusProccess(['id' => $value['id'], 'status_proccess' => 1);
+            }
+        }
         $data = $this->card_repo->updateStatusProccess($currentDay);
 
         return response()->json(['message' => 'Cập nhật trạng thái thành công']);
