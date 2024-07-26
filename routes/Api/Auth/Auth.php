@@ -21,6 +21,7 @@ Route::group(['middleware' => ['filter.signed']], function (){
     Route::get('sync-lo-ket-toan', 'MoneyComesBackController@syncLoKetToan');
     Route::get('sync-ho-kinh-doanh', 'HoKinhDoanhController@syncBalance');
     Route::get('sync-agency', 'AgentController@syncBalance');
+    Route::get('sync-card-day', 'CardController@updateCardStatus');
 });
 
 Route::group(['middleware' => ['auth.jwt']], function (){
