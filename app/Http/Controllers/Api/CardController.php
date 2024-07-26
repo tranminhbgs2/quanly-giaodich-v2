@@ -44,34 +44,34 @@ class CardController extends Controller
         $data = $this->card_repo->getListing($params, false);
         $total = $this->card_repo->getListing($params, true);
 
-        $current_day = now()->day; // Lấy ngày hiện tại
+        // $current_day = now()->day; // Lấy ngày hiện tại
 
-        $less_than_current = [];
-        $equal_to_current = [];
-        $greater_than_current = [];
+        // $less_than_current = [];
+        // $equal_to_current = [];
+        // $greater_than_current = [];
 
-        // Phân chia mảng thành ba phần
-        foreach ($data as $item) {
-            if ($item['day'] < $current_day) {
-                $less_than_current[] = $item;
-            } elseif ($item['day'] == $current_day) {
-                $equal_to_current[] = $item;
-            } else {
-                $greater_than_current[] = $item;
-            }
-        }
+        // // Phân chia mảng thành ba phần
+        // foreach ($data as $item) {
+        //     if ($item['day'] < $current_day) {
+        //         $less_than_current[] = $item;
+        //     } elseif ($item['day'] == $current_day) {
+        //         $equal_to_current[] = $item;
+        //     } else {
+        //         $greater_than_current[] = $item;
+        //     }
+        // }
 
-        // Sắp xếp mỗi phần riêng biệt
-        usort($less_than_current, function ($a, $b) {
-            return $a['day'] - $b['day'];
-        });
+        // // Sắp xếp mỗi phần riêng biệt
+        // usort($less_than_current, function ($a, $b) {
+        //     return $a['day'] - $b['day'];
+        // });
 
-        usort($greater_than_current, function ($a, $b) {
-            return $a['day'] - $b['day'];
-        });
+        // usort($greater_than_current, function ($a, $b) {
+        //     return $a['day'] - $b['day'];
+        // });
 
-        // Kết hợp các phần lại theo thứ tự mong muốn
-        $sorted_array = array_merge($less_than_current, $equal_to_current, $greater_than_current);
+        // // Kết hợp các phần lại theo thứ tự mong muốn
+        // $sorted_array = array_merge($less_than_current, $equal_to_current, $greater_than_current);
 
         return response()->json([
             'code' => 200,
@@ -276,5 +276,14 @@ class CardController extends Controller
             'error' => 'Danh sách thẻ',
             'data' => $data
         ]);
+    }
+    public function updateCardStatus()
+    {
+        // Lấy ngày hiện tại
+        $currentDay = Carbon::now()->day;
+
+        $data = $this->card_repo->updateStatusProccess($currentDay);
+
+        return response()->json(['message' => 'Cập nhật trạng thái thành công']);
     }
 }
