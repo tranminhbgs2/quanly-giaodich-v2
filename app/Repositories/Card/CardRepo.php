@@ -81,7 +81,7 @@ class CardRepo extends BaseRepo
                 $query->take($page_size)->skip($offset);
             }
         }
-        $query->orderBy('id', 'DESC');
+        $query->orderBy('status_proccess', 'DESC');
 
         return $query->get()->toArray();
     }
@@ -279,5 +279,19 @@ class CardRepo extends BaseRepo
     public function getAll()
     {
         return Card::select('id', 'name', 'phone')->where('status', Constants::USER_STATUS_ACTIVE)->orderBy('id', 'DESC')->get()->toArray();
+    }
+
+    public function updateStatusProccess($currentDay)
+    {
+        // Cập nhật các bản ghi có trạng thái 1 - Chưa xử lý và day < ngày hiện tại
+        Card::where('status_proccess', 1)
+            ->where('day', '<', $currentDay)
+            ->update(['status_proccess' => 4]); // 4 - Quá hạn
+
+        // Cập nhật các bản ghi có trạng thái 1 - Chưa xử lý và day >= ngày hiện tại
+        Card::where('status_proccess', 1)
+            ->where('day', '>=', $currentDay)
+            ->update(['status_proccess' => 3]); // 3 - Sắp đến hạn
+        return true;
     }
 }
