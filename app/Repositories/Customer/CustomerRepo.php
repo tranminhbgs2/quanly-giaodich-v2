@@ -46,7 +46,7 @@ class CustomerRepo extends BaseRepo
         if ($status > 0) {
             $query->where('status', $status);
         }
-
+        $query->where('created_by', auth()->user()->id);
         if ($is_counting) {
             return $query->count();
         } else {
