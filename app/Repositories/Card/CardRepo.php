@@ -73,6 +73,7 @@ class CardRepo extends BaseRepo
             $query->where('day', $day);
         }
 
+        $query->where('created_by', auth()->user()->id);
         if ($is_counting) {
             return $query->count();
         } else {
