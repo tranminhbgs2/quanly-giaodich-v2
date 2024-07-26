@@ -275,10 +275,10 @@ class CardController extends Controller
         $params['status_proccess'] = request('status_proccess', Constants::USER_STATUS_ACTIVE);
         // Lấy ngày hiện tại
         $currentDay = Carbon::now()->day;
-
+        $card = $this->card_repo->getById($params['id']);
         if ($params['status_proccess'] != 2) {
-            if ($params['day'] >= $currentDay) {
-                if ($params['day'] - $currentDay < 4) {
+            if ($card->day >= $currentDay) {
+                if ($card->day - $currentDay < 4) {
                     $params['status_proccess'] = 3; // Sắp đến hạn
                 }
             } else {
