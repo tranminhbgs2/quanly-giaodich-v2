@@ -42,6 +42,10 @@ class Card extends Model
         $name = '';
         if ($this->status_proccess == 2) {
             $name = 'Đã xử lý';
+        } else if ($this->status_proccess == 3) {
+            $name = 'Sắp đến hạn';
+        }  else if ($this->status_proccess == 4) {
+            $name = 'Đã quá hạn';
         } else {
             $name = 'Chưa xử lý';
         }
