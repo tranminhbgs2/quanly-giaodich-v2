@@ -218,6 +218,6 @@ class CustomerRepo extends BaseRepo
 
     public function getAll()
     {
-        return Customer::select('id', 'name', 'phone')->where('status', Constants::USER_STATUS_ACTIVE)->orderBy('id', 'DESC')->get()->toArray();
+        return Customer::select('id', 'name', 'phone')->where('created_by', auth()->user()->id)->where('status', Constants::USER_STATUS_ACTIVE)->orderBy('id', 'DESC')->get()->toArray();
     }
 }
