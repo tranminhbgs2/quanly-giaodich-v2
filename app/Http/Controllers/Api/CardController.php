@@ -151,7 +151,18 @@ class CardController extends Controller
         $params['day'] = request('day', 0);
         $params['limit'] = request('limit', 0);
         $params['created_by'] = auth()->user()->id;
+        // Lấy ngày hiện tại
+        $currentDay = Carbon::now()->day;
 
+        if ($params['status_proccess'] != 2) {
+            if ($params['day'] >= $currentDay) {
+                if ($params['day'] - $currentDay < 4) {
+                    $params['status_proccess'] = 3; // Sắp đến hạn
+                }
+            } else {
+                $params['status_proccess'] = 4; // Quá hạn
+            }
+        }
         $resutl = $this->card_repo->store($params);
         if ($resutl) {
             return response()->json([
@@ -189,7 +200,18 @@ class CardController extends Controller
             $params['day'] = request('day', 0);
             $params['limit'] = request('limit', 0);
             $params['created_by'] = auth()->user()->id;
+            // Lấy ngày hiện tại
+            $currentDay = Carbon::now()->day;
 
+            if ($params['status_proccess'] != 2) {
+                if ($params['day'] >= $currentDay) {
+                    if ($params['day'] - $currentDay < 4) {
+                        $params['status_proccess'] = 3; // Sắp đến hạn
+                    }
+                } else {
+                    $params['status_proccess'] = 4; // Quá hạn
+                }
+            }
             $resutl = $this->card_repo->update($params, $params['id']);
 
             if ($resutl) {
