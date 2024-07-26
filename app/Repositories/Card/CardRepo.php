@@ -277,9 +277,13 @@ class CardRepo extends BaseRepo
         return Card::where('id', $id)->update($update);
     }
 
-    public function getAll()
-    {
-        return Card::select('id', 'name', 'phone')->where('status', Constants::USER_STATUS_ACTIVE)->orderBy('id', 'DESC')->get()->toArray();
+    public function getAll($is_staff = true)
+    {    
+        $query = Card::select('id', 'name', 'phone')->where('status', Constants::USER_STATUS_ACTIVE);
+        if($is_staff){
+            $query->where('created_by', auth()->user()->id);
+        }
+        return $query->orderBy('id', 'DESC')->get()->toArray();
     }
 
     public function updateStatusProccess($currentDay)
