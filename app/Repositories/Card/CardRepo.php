@@ -291,6 +291,7 @@ class CardRepo extends BaseRepo
         // Cập nhật các bản ghi có trạng thái 1 - Chưa xử lý và day >= ngày hiện tại
         Card::where('status_proccess', 1)
             ->where('day', '>=', $currentDay)
+            ->whereRaw("($currentDay - day) < 4")
             ->update(['status_proccess' => 3]); // 3 - Sắp đến hạn
         return true;
     }
