@@ -318,7 +318,7 @@ class CardController extends Controller
         if($currentDay == 1) {
             $data = $this->card_repo->getAll(false);
             foreach($data as $value){
-                $resutl = $this->card_repo->changeStatusProccess(['id' => $value['id'], 'status_proccess' => 1);
+                $resutl = $this->card_repo->changeStatusProccess(['id' => $value['id'], 'status_proccess' => 1]);
             }
         }
         $data = $this->card_repo->updateStatusProccess($currentDay);
