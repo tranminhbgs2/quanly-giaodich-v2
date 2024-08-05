@@ -325,4 +325,18 @@ class UserRepo extends BaseRepo
 
         return $result;
     }
+        public function changePassword($params, $user_obj)
+    {
+        $password = isset($params['password']) ? $params['password'] : null;
+
+        if (is_object($user_obj) && $user_obj && $password) {
+            $user_obj->password = Hash::make($password);
+
+            if ($user_obj->save()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
