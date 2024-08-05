@@ -19,7 +19,7 @@ class UserRepo extends BaseRepo
         $date_from = $params['date_from'] ?? null;
         $date_to = $params['date_to'] ?? null;
 
-        $query = User::select()->with('agency');
+        $query = User::select();
 
         if ($date_from && $date_to) {
             $query->whereBetween('created_at', [$date_from, $date_to]);
