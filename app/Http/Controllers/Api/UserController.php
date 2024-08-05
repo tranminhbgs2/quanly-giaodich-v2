@@ -16,6 +16,7 @@ use App\Repositories\Category\CategoryRepo;
 use App\Repositories\HoKinhDoanh\HoKinhDoanhRepo;
 use App\Repositories\Transaction\TransactionRepo;
 use App\Repositories\Transfer\TransferRepo;
+use App\Repositories\Customer\CustomerRepo;
 use App\Repositories\User\UserRepo;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -25,9 +26,10 @@ class UserController extends Controller
     protected $user_repo;
     protected $cus_repo;
 
-    public function __construct(UserRepo $cateRepo)
+    public function __construct(UserRepo $cateRepo, CustomerRepo $cusRepo)
     {
         $this->user_repo = $cateRepo;
+        $this->cus_repo = $cusRepo;
     }
 
     /**
