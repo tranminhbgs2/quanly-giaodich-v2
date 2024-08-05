@@ -31,8 +31,7 @@ class StoreRequest extends FormRequest
             'fullname' => ['required'],
             'phone' => ['required'],
             'username' => [
-                'required',
-                new UsernameRule()
+                'required'
             ],
             'password' => [
                 'required',
