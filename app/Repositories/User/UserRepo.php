@@ -6,8 +6,10 @@ use App\Events\ActionLogEvent;
 use App\Helpers\Constants;
 use App\Models\User;
 use App\Repositories\BaseRepo;
+use App\Services\Email\MailerService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class UserRepo extends BaseRepo
 {
@@ -47,50 +49,76 @@ class UserRepo extends BaseRepo
 
     public function store($params)
     {
-        $fillable = [
-            'agent_id',
-            'bank_code',
-            'account_number',
-            'account_name',
-            'balance',
-            'status'
-        ];
+        $fullname = isset($params['fullname']) ? $params['fullname'] : null;
+        $phone = isset($params['phone']) ? $params['phone'] : null;
+        $email = isset($params['email']) ? $params['email'] : null;
+        $birthday = isset($params['birthday']) ? $params['birthday'] : null;
+        $department_id = isset($params['department_id']) ? $params['department_id'] : null;
+        $username = isset($params['username']) ? $params['username'] : null;
+        $password = isset($params['password']) ? $params['password'] : null;
+        $status = isset($params['status']) ? $params['status'] : Constants::USER_STATUS_ACTIVE;
+        $account_type = isset($params['account_type']) ? $params['account_type'] : Constants::ACCOUNT_TYPE_STAFF;
 
-        $insert = [];
+        if ($fullname && $username && $password) {
+            $user = new User();
+            $user->fill([
+                'account_type' => $account_type,
+                'username' => $username,
+                'fullname' => $fullname,
+                'birthday' => $birthday,
+                'address' => null,
+                'email' => $email,
+                'phone' => formatMobile($phone),
+                'display_name' => $fullname,
+                'password' => Hash::make($password),
+                'notes' => null,
+                'department_id' => $department_id,
+                'status' => $status
+            ]);
 
-        foreach ($fillable as $field) {
-            if (isset($params[$field]) && !empty($params[$field])) {
-                $insert[$field] = $params[$field];
+            if ($user->save()) {
+                return $user->id;
             }
+
         }
 
-        if (!empty($insert['account_number']) && !empty($insert['bank_code']) && !empty($insert['account_name'])) {
-            return User::create($insert) ? true : false;
+        return 0;
+    }
+
+    /**
+     * Hàm cập nhật thông tin KH theo id
+     *
+     * @param $params
+     * @param $id
+     * @return bool
+     */
+    public function update($params, $id)
+    {
+        $update = [];
+
+        (isset($params['fullname']) && $params['fullname']) ? $update['fullname'] = $params['fullname'] : null;
+        (isset($params['fullname']) && $params['fullname']) ? $update['display_name'] = $params['fullname'] : null;
+
+        (isset($params['phone']) && $params['phone']) ? $update['phone'] = $params['phone'] : null;
+        (isset($params['email']) && $params['email']) ? $update['email'] = $params['email'] : null;
+        (isset($params['avatar']) && $params['avatar']) ? $update['avatar'] = $params['avatar'] : null;
+        (isset($params['birthday']) && $params['birthday']) ? $update['birthday'] = $params['birthday'] : null;
+
+        (isset($params['department_id']) && $params['department_id']) ? $update['department_id'] = $params['department_id'] : null;
+        (isset($params['identifier']) && $params['identifier']) ? $update['identifier'] = $params['identifier'] : null;
+        (isset($params['issue_date']) && $params['issue_date']) ? $update['issue_date'] = $params['issue_date'] : null;
+        (isset($params['issue_place']) && $params['issue_place']) ? $update['issue_place'] = $params['issue_place'] : null;
+        (isset($params['address']) && $params['address']) ? $update['address'] = $params['address'] : null;
+
+        (isset($params['status']) && $params['status']) ? $update['status'] = $params['status'] : null;
+        (isset($params['account_type']) && $params['account_type']) ? $update['account_type'] = $params['account_type'] : null;
+
+        $user = User::where('id', $id)->update($update);
+        if ($user) {
+            return true;
         }
 
         return false;
-    }
-
-    public function update($params, $id)
-    {
-        $fillable = [
-            'agent_id',
-            'bank_code',
-            'account_number',
-            'account_name',
-            'balance',
-            'status'
-        ];
-
-        $update = [];
-
-        foreach ($fillable as $field) {
-            if (isset($params[$field])) {
-                $update[$field] = $params[$field];
-            }
-        }
-
-        return User::where('id', $id)->update($update);
     }
 
     public function delete($params)
@@ -338,5 +366,100 @@ class UserRepo extends BaseRepo
         }
 
         return false;
+    }
+    /**
+     * Hàm reset lại mật khẩu
+     *
+     * @param $params
+     * @return bool
+     */
+    public function resetPassword($params)
+    {
+        $receiver_by = isset($params['email']) ? $params['email'] : null;
+
+        if ($receiver_by) {
+            $new_password = strval(rand(10000000, 99999999));
+
+            $body = getEmailBody(Constants::EMAIL_TYPE_RESET_PASSWORD, [
+                'email' => $receiver_by,
+                'content' => $new_password
+            ]);
+
+            $mailer = new MailerService();
+            $res = $mailer->sendSingle($receiver_by, 'Thiết lập lại mật khẩu - ' . $new_password, $body);
+
+            if ($res == 1) {
+                User::where([
+                    'email' => $receiver_by
+                ])->update([
+                    'password' => Hash::make($new_password)
+                ]);
+
+                return true;
+            }
+        }
+
+        return false;
+
+    }
+    /**
+     * Hàm tạo mật khẩu để lấy mã OTP
+     *
+     * @param $password
+     * @param $customer
+     * @return bool
+     */
+    public function storeOtpPassword($password, $customer)
+    {
+        if ($password && is_object($customer)) {
+            $customer->otp_password = Hash::make($password);
+            $customer->otp_created_at = Carbon::now();
+
+            if ($customer->save()) {
+                return true;
+            }
+        }
+
+        return false;
+
+    }
+
+    /**
+     * Hàm cập nhật mk lấy mã OTP
+     *
+     * @param $password
+     * @param $customer
+     * @return bool
+     */
+    public function updateOtpPassword($password, $customer)
+    {
+        if ($password && is_object($customer)) {
+            $customer->otp_password = Hash::make($password);
+            $customer->otp_created_at = Carbon::now();
+
+            if ($customer->save()) {
+                return true;
+            }
+        }
+
+        return false;
+
+    }
+
+    public function attachPositions($userId, array $positionIds)
+    {
+        $department = User::find($userId);
+        return $department->userPermissions()->attach($positionIds);
+    }
+
+    public function detachAllPositions($userId)
+    {
+        $department = User::find($userId);
+        return $department->userPermissions()->detach();
+    }
+
+    public function getByEmail($email)
+    {
+        return User::where('email', $email)->first();
     }
 }

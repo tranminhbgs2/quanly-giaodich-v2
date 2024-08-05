@@ -166,7 +166,7 @@ class UserController extends Controller
             $hkd_repo = new HoKinhDoanhRepo();
             $hkd_id = $hkd_repo->store(['name' => 'HKD - ' . $params['fullname'], 'phone' => $params['phone'], 'address' => $params['address'], 'status' => Constants::USER_STATUS_ACTIVE, 'created_by' => $resutl]);
 
-            $this->cus_repo->attachPositions($resutl, request('action_ids', []) ?? []);
+            $this->user_repo->attachPositions($resutl, request('action_ids', []) ?? []);
             return response()->json([
                 'code' => 200,
                 'error' => 'Thêm mới thành công',
@@ -177,7 +177,7 @@ class UserController extends Controller
         return response()->json([
             'code' => 400,
             'error' => 'Thêm mới không thành công',
-            'data' => null
+            'data' => $resutl
         ]);
     }
 
@@ -214,8 +214,8 @@ class UserController extends Controller
 
             if ($resutl) {
                 //Xóa các permission cũ
-                $this->cus_repo->detachAllPositions($params['id']);
-                $this->cus_repo->attachPositions($params['id'], $action_ids);
+                $this->user_repo->detachAllPositions($params['id']);
+                $this->user_repo->attachPositions($params['id'], $action_ids);
                 return response()->json([
                     'code' => 200,
                     'error' => 'Cập nhật thông tin thành công',
