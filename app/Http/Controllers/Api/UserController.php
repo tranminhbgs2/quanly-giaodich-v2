@@ -47,8 +47,8 @@ class UserController extends Controller
         $params['page_size'] = request('page_size', 10);
         //$params['account_type'] = auth()->user()->account_type;
 
-        $data = $this->cus_repo->getListing($params, false);
-        $total = $this->cus_repo->getListing($params, true);
+        $data = $this->user_repo->getListing($params, false);
+        $total = $this->user_repo->getListing($params, true);
         return response()->json([
             'code' => 200,
             'error' => 'Danh sách User',
@@ -154,7 +154,7 @@ class UserController extends Controller
 
         // Gán lại giá trị vào mảng
         $params['birthday'] = $birthday;
-        $resutl = $this->cus_repo->store($params);
+        $resutl = $this->user_repo->store($params);
 
         if ($resutl) {
             // Thêm categories
@@ -210,7 +210,7 @@ class UserController extends Controller
             $params['birthday'] = $birthday;
 
             $action_ids = request('action_ids', []) ?? [];
-            $resutl = $this->cus_repo->update($params, $params['id']);
+            $resutl = $this->user_repo->update($params, $params['id']);
 
             if ($resutl) {
                 //Xóa các permission cũ
@@ -312,7 +312,7 @@ class UserController extends Controller
     {
         $params['password'] = request('password', null);
 
-        $result = $this->cus_repo->changePassword($params, Auth::user());
+        $result = $this->user_repo->changePassword($params, Auth::user());
 
         if ($result) {
             return response()->json([
